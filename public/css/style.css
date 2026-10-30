@@ -672,3 +672,28 @@ svg.leaflet-zoom-animated path.radar-circle,
 path[stroke="#0284c7"] {
     pointer-events: none !important;
 }
+/* WIDGET THỜI TIẾT & RADAR MÂY MƯA (RainViewer + Open-Meteo) */
+.weather-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: default;
+    transition: all 0.2s ease;
+}
+.weather-pill:hover {
+    background: rgba(56, 189, 248, 0.22);
+}
+/* Trạng thái khi nút Radar Mưa đang được bật */
+.btn-control.active {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(2, 132, 199, 0.7);
+}

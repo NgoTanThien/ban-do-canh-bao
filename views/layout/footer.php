@@ -12,6 +12,10 @@
             </button>
             <button class="btn-control" onclick="openRadarSettings()" title="Radar cảnh báo GPS & Thông báo">
                 <i class="ph-bold ph-radar" style="color: #38bdf8;"></i>
+
+             <!-- 👉 THÊM NÚT NÀY: Bật/Tắt Radar Mây Mưa RainViewer -->
+            <button class="btn-control" id="btn-radar" onclick="toggleRadarLayer()" title="Bật/Tắt Radar Mây Mưa">
+                <i class="ph-bold ph-cloud-rain"></i>
             </button>
         </div>
         <button class="btn-report" onclick="openReportSheet()">

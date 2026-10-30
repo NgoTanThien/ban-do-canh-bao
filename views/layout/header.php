@@ -40,6 +40,15 @@ if (session_status() === PHP_SESSION_NONE) {
             <span id="status-text">Đang tải trạng thái...</span>
         </div>
         
+        <!--  THÊM KHỐI NÀY: Hiển thị nhiệt độ & icon thời tiết thời gian thực -->
+        <div class="weather-pill" id="weather-pill" title="Thời tiết hiện tại">
+            <span id="weather-icon"><i class="ph-bold ph-cloud-sun"></i></span>
+            <span id="weather-temp">--°C</span>
+        </div>
+
+       
+            
+        
         <div class="filter-pill" onclick="toggleFilterMenu(event)">
             <span id="currentFilterText">Tất cả sự cố</span>
             <i class="ph-bold ph-caret-down"></i>

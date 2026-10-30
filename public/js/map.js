@@ -35,6 +35,7 @@ let closestAlertPos = null;
 // Tự động định vị và zoom sát vào vị trí người dùng ngay khi vào trang
 locateUser(true);
 loadReports();
+loadWeatherData(savedLat, savedLng); // Tự động lấy nhiệt độ thời tiết lúc mở trang
 
 // 3. Các hàm điều khiển zoom bản đồ
 function zoomInMap() {
@@ -104,6 +105,7 @@ function locateUser(zoom = true, showAlert = false) {
             window.userLocation = { lat, lng };
             localStorage.setItem('lastKnownLat', lat);
             localStorage.setItem('lastKnownLng', lng);
+            loadWeatherData(lat, lng); // 👉 THÊM DÒNG NÀY: cập nhật thời tiết theo tọa độ GPS vừa lấy
 
             const latInput = document.getElementById('report_lat');
             const lngInput = document.getElementById('report_lng');
@@ -1197,3 +1199,114 @@ async function handleAuthRegister(e) {
 // Tải dữ liệu lần đầu và tự động làm mới mỗi 25 giây
 loadReports();
 setInterval(loadReports, 25000);
+
+
+// TÍCH HỢP THIRD-PARTY APIS: THỜI TIẾT (OPEN-METEO) & RADAR MÂY MƯA (RAINVIEWER)
+// 1. Lấy nhiệt độ và tình trạng thời tiết thời gian thực
+async function loadWeatherData(lat = 12.2458, lng = 109.1943) {
+    const tempEl = document.getElementById('weather-temp');
+    const iconEl = document.getElementById('weather-icon');
+    const weatherPill = document.getElementById('weather-pill');
+    if (!tempEl) return;
+
+    try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (data && data.current_weather) {
+            const temp = Math.round(data.current_weather.temperature);
+            const code = data.current_weather.weathercode;
+            
+            let iconClass = 'ph-bold ph-sun';
+            let desc = 'Trời quang';
+
+            // Phân loại mã thời tiết theo chuẩn WMO
+            if (code === 0) {
+                iconClass = 'ph-bold ph-sun';
+                desc = 'Trời nắng';
+            } else if ([1, 2, 3].includes(code)) {
+                iconClass = 'ph-bold ph-cloud-sun';
+                desc = 'Có mây';
+            } else if ([45, 48].includes(code)) {
+                iconClass = 'ph-bold ph-cloud-fog';
+                desc = 'Sương mù';
+            } else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
+                iconClass = 'ph-bold ph-cloud-rain';
+                desc = 'Đang có mưa';
+            } else if ([95, 96, 99].includes(code)) {
+                iconClass = 'ph-bold ph-cloud-lightning';
+                desc = 'Giông bão nguy hiểm';
+            }
+
+            tempEl.innerText = `${temp}°C`;
+            if (iconEl) {
+                iconEl.innerHTML = `<i class="${iconClass}" style="font-size: 1.15rem;"></i>`;
+            }
+            if (weatherPill) {
+                weatherPill.title = `Thời tiết hiện tại: ${desc} (${temp}°C)`;
+            }
+        }
+    } catch (err) {
+        console.warn('Lỗi lấy dữ liệu thời tiết:', err);
+    }
+}
+
+// 2. Quản lý lớp phủ Radar Mây Mưa từ RainViewer API
+let rainRadarLayer = null;
+let isRadarActive = false;
+
+async function toggleRadarLayer() {
+    const btn = document.getElementById('btn-radar');
+    
+    // Nếu đang bật -> Bấm lần nữa để tắt
+    if (isRadarActive) {
+        if (rainRadarLayer && map.hasLayer(rainRadarLayer)) {
+            map.removeLayer(rainRadarLayer);
+        }
+        isRadarActive = false;
+        if (btn) btn.classList.remove('active');
+        showToast('Đã tắt radar mây mưa', true);
+        return;
+    }
+
+    // Bật lớp radar mây mưa
+    try {
+        if (btn) btn.classList.add('active');
+        showToast('Đang kết nối vệ tinh radar thời tiết...', true);
+
+        const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+        const data = await res.json();
+        
+        if (!data || !data.radar || !data.radar.past || data.radar.past.length === 0) {
+            throw new Error('Dữ liệu radar hiện chưa sẵn sàng');
+        }
+
+        // Lấy khung ảnh vệ tinh radar mới nhất vừa chụp
+        const latestFrame = data.radar.past[data.radar.past.length - 1];
+        const tileUrl = `${data.host}${latestFrame.path}/256/{z}/{x}/{y}/2/1_1.png`;
+
+        if (rainRadarLayer && map.hasLayer(rainRadarLayer)) {
+            map.removeLayer(rainRadarLayer);
+        }
+
+        // Tạo lớp TileLayer phủ lên bản đồ Leaflet với độ trong suốt 0.65
+        rainRadarLayer = L.tileLayer(tileUrl, {
+            tileSize: 256,
+            opacity: 0.65,
+            zIndex: 50,
+            maxNativeZoom: 7, // 👉 THÊM DÒNG NÀY: Mức zoom tối đa RainViewer hỗ trợ
+            maxZoom: 19,      // 👉 THÊM DÒNG NÀY: Cho phép Leaflet tự phóng to mây khi zoom cận cảnh
+            attribution: '&copy; <a href="https://www.rainviewer.com/" target="_blank">RainViewer</a>'
+        });
+
+        rainRadarLayer.addTo(map);
+        isRadarActive = true;
+        showToast('Đã bật radar mây mưa trực tiếp! 🌧️', true);
+    } catch (err) {
+        console.error('Lỗi tải radar mây mưa:', err);
+        showToast('Không thể tải radar mây mưa, vui lòng thử lại sau!', false);
+        if (btn) btn.classList.remove('active');
+        isRadarActive = false;
+    }
+}

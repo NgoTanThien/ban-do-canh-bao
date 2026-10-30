@@ -94,6 +94,69 @@ body, html {
     max-width: calc(100vw - 120px);
 }
 
+/* Banner cảnh báo bán kính nguy hiểm quanh GPS */
+.proximity-banner {
+    position: absolute;
+    top: 68px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(185, 28, 28, 0.95));
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(248, 113, 113, 0.6);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: bounceAlert 1.2s ease infinite alternate;
+    max-width: 92vw;
+    transition: all 0.3s ease;
+}
+
+@keyframes bounceAlert {
+    0% { transform: translateX(-50%) translateY(0); }
+    100% { transform: translateX(-50%) translateY(-3px); }
+}
+
+.proximity-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.proximity-icon {
+    font-size: 1.15rem;
+    color: #fef08a;
+}
+
+.btn-proximity-action {
+    background: rgba(255, 255, 255, 0.22);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.btn-close-banner {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.btn-close-banner:hover {
+    color: white;
+}
+
 .notification-pill {
     display: flex;
     align-items: center;
@@ -452,13 +515,17 @@ body, html {
 
 /* 5. Custom Marker Animations trên Leaflet */
 .pulse-marker-flood {
-    width: 22px;
-    height: 22px;
-    background: rgba(2, 132, 199, 0.9);
-    border: 3px solid white;
+    width: 26px;
+    height: 26px;
+    background: rgba(2, 132, 199, 0.95);
+    border: 2.5px solid white;
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     animation: ripple-flood 2s infinite ease-out;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @keyframes ripple-flood {
@@ -468,13 +535,17 @@ body, html {
 }
 
 .pulse-marker-traffic {
-    width: 22px;
-    height: 22px;
-    background: rgba(239, 68, 68, 0.9);
-    border: 3px solid white;
+    width: 26px;
+    height: 26px;
+    background: rgba(239, 68, 68, 0.95);
+    border: 2.5px solid white;
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     animation: ripple-traffic 2s infinite ease-out;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @keyframes ripple-traffic {
@@ -593,4 +664,11 @@ body, html {
 .leaflet-popup-content {
     margin: 12px 14px;
     line-height: 1.5;
+}
+
+/* Đảm bảo vòng radar không bao giờ cản trở thao tác click / chạm / chấm điểm trên bản đồ */
+.radar-circle,
+svg.leaflet-zoom-animated path.radar-circle,
+path[stroke="#0284c7"] {
+    pointer-events: none !important;
 }

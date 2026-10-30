@@ -58,6 +58,16 @@ if (session_status() === PHP_SESSION_NONE) {
         </div>
     </div>
 
+    <!-- Banner cảnh báo sự cố nguy hiểm trong bán kính GPS -->
+    <div id="proximity-alert-banner" class="proximity-banner" style="display: none;">
+        <div class="proximity-banner-content" onclick="focusClosestAlert()">
+            <i class="ph-fill ph-warning-octagon proximity-icon"></i>
+            <span id="proximity-banner-text">Đang quét sự cố quanh bạn...</span>
+            <span class="btn-proximity-action">Xem vị trí &rarr;</span>
+        </div>
+        <button type="button" class="btn-close-banner" onclick="dismissProximityBanner(event)" title="Đóng cảnh báo">&times;</button>
+    </div>
+
     <!-- Thông báo kết quả từ PHP (Flash Message) -->
     <?php if (!empty($_SESSION['flash_success'])): ?>
         <div style="position: fixed; top: 75px; left: 50%; transform: translateX(-50%); z-index: 9999; background: #059669; color: white; padding: 12px 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 500; cursor: pointer;" onclick="this.remove()">

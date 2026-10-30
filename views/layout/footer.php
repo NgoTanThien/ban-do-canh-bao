@@ -10,6 +10,9 @@
             <button class="btn-control" onclick="locateUser(true, true)" title="Vị trí của bạn">
                 <i class="ph-bold ph-crosshair"></i>
             </button>
+            <button class="btn-control" onclick="openRadarSettings()" title="Radar cảnh báo GPS & Thông báo">
+                <i class="ph-bold ph-radar" style="color: #38bdf8;"></i>
+            </button>
         </div>
         <button class="btn-report" onclick="openReportSheet()">
             <i class="ph-bold ph-warning-circle" style="font-size: 1.25rem;"></i>

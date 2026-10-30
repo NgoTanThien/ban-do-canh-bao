@@ -99,8 +99,12 @@ class UserModel {
     // Trừ điểm uy tín (không xuống dưới 0)
     public function deductReputation($user_id, $points = 1)
     {
-        $stmt = $this->conn->prepare("UPDATE users SET reputation_score = GREATEST(0, reputation_score - ?) WHERE id = ?");
-        $stmt->bind_param("ii", $points, $user_id);
+         $sql = "UPDATE users 
+                SET reputation_score = GREATEST(0, reputation_score - ?),
+                    status = CASE WHEN GREATEST(0, reputation_score - ?) <= 0 THEN 'blocked' ELSE status END
+                WHERE id = ? AND role != 'admin'";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("iii", $points, $points, $user_id);
         return $stmt->execute();
     }
 }

@@ -28,7 +28,7 @@
                 <span>Tin mới</span>
             </a>
             <a href="#" class="menu-item" onclick="openSubPanel('Theo dõi khu vực', 'follow')">
-                <i class="ph-bold ph-radar" style="color: #38bdf8;"></i>
+                <i class="ph ph-broadcast"></i>
                 <span>Radar GPS</span>
                 <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 6px; border-radius: 10px; margin-left: auto; font-weight: 700;">Mới</span>
             </a>

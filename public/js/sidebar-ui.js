@@ -936,7 +936,7 @@ function openSubPanel(title, type, extraData = {}) {
                 <div class="panel-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <span style="color:white; font-weight:600; font-size:0.9rem;">
-                            <i class="ph-bold ph-radar" style="color:#38bdf8; margin-right:4px;"></i> Quét radar quanh GPS
+                            <i class="ph-bold ph-broadcast" style="color:#38bdf8; margin-right:4px;"></i> Quét radar quanh GPS
                         </span>
                         <label style="cursor:pointer; display:flex; align-items:center; gap:6px;">
                             <input type="checkbox" ${enableProximityAlert ? 'checked' : ''} onchange="toggleProximityAlert(this.checked)" style="width:18px; height:18px; cursor:pointer;">

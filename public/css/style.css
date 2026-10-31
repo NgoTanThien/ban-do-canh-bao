@@ -696,7 +696,7 @@ path[stroke="#0284c7"] {
     background: #0284c7 !important;
     color: #ffffff !important;
     box-shadow: 0 0 12px rgba(2, 132, 199, 0.7);
-
+}
 /* ==========================================================================
    F8 AUTHENTICATION PILL UI & COMPONENTS
    ========================================================================== */
@@ -864,5 +864,4 @@ path[stroke="#0284c7"] {
 
 .f8-btn-back:hover {
     color: #111111;
-}
 }

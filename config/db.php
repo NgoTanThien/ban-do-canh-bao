@@ -15,6 +15,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Thêm dòng này để sửa lỗi font tiếng Việt trả về dạng \u00...
+// Bộ mã ký tự chuẩn UTF-8 tiếng Việt
 $conn->set_charset("utf8mb4");
+
+// Đồng bộ múi giờ Việt Nam
+$conn->query("SET time_zone = '+07:00'");
 ?>

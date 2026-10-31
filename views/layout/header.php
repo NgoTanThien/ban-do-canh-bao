@@ -8,6 +8,19 @@ if (session_status() === PHP_SESSION_NONE) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <?php
+$googleConfigFile = __DIR__ . '/../../config/google.php';
+if (file_exists($googleConfigFile)) {
+    require_once $googleConfigFile;
+}
+?>
+    <?php if (defined('GOOGLE_CLIENT_ID')): ?>
+    <meta name="google-signin-client_id" content="<?= htmlspecialchars(GOOGLE_CLIENT_ID) ?>">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        window.GOOGLE_CLIENT_ID = <?= json_encode(GOOGLE_CLIENT_ID) ?>;
+    </script>
+    <?php endif; ?>
     <title>Bản đồ Cảnh Báo Điểm Ngập & Kẹt Xe Công Cộng</title>
 
     <!-- Leaflet CSS -->
@@ -23,6 +36,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
     <!-- Style CSS -->
     <link rel="stylesheet" href="public/css/style.css">
+    <!-- Firebase Auth Web SDK (Google Sign-In) -->
+    <script type="module" src="public/js/firebase-auth.js"></script>
 </head>
 <body>
 

@@ -696,4 +696,173 @@ path[stroke="#0284c7"] {
     background: #0284c7 !important;
     color: #ffffff !important;
     box-shadow: 0 0 12px rgba(2, 132, 199, 0.7);
+
+/* ==========================================================================
+   F8 AUTHENTICATION PILL UI & COMPONENTS
+   ========================================================================== */
+.f8-pill-btn {
+    width: 360px;
+    max-width: 100%;
+    height: 44px;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: 1.5px solid #dce0e3;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    outline: none;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+
+.f8-pill-btn:hover {
+    background: #f8f9fa;
+    border-color: #c9ced4;
+}
+
+.f8-pill-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.f8-pill-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #35414c;
+    text-align: center;
+}
+
+.f8-form-input,
+.f8-pill-input {
+    width: 100%;
+    height: 44px;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: 1.5px solid #dce0e3;
+    padding: 0 20px;
+    font-size: 14px;
+    color: #292929;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.f8-form-input:focus,
+.f8-pill-input:focus {
+    border-color: #1dbfaf;
+}
+
+.f8-combo-input {
+    width: 100%;
+    height: 44px;
+    border-radius: 9999px;
+    background: #d0d4d9;
+    display: flex;
+    align-items: center;
+    padding: 2px 3px 2px 20px;
+    margin-top: 12px;
+    box-sizing: border-box;
+    transition: background 0.2s;
+}
+
+.f8-combo-inner-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #111111;
+}
+
+.f8-combo-inner-input::placeholder {
+    color: #666666;
+}
+
+.f8-btn-send-code {
+    height: 40px;
+    padding: 0 24px;
+    border-radius: 9999px;
+    border: none;
+    background: #c4c8cc;
+    color: #555555;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: not-allowed;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.f8-btn-send-code.active {
+    background: #1dbfaf;
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(29, 191, 175, 0.3);
+}
+
+.f8-btn-send-code.active:hover {
+    background: #17a092;
+}
+
+.f8-btn-submit-reset {
+    width: 100%;
+    height: 44px;
+    border-radius: 9999px;
+    background: linear-gradient(to right, #6ae3df, #8be9dd);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.2s;
+}
+
+.f8-btn-submit-reset:hover {
+    opacity: 0.93;
+}
+
+.f8-submit-btn {
+    width: 100%;
+    height: 44px;
+    border-radius: 9999px;
+    background: linear-gradient(to right, #f05123, #fe7147);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 14px;
+}
+
+.f8-submit-btn:hover {
+    opacity: 0.92;
+}
+
+.f8-btn-back {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+    margin-bottom: 14px;
+}
+
+.f8-btn-back:hover {
+    color: #111111;
+}
 }

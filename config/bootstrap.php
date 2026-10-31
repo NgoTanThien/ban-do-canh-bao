@@ -4,6 +4,8 @@
 // Dùng: require_once __DIR__ . '/../config/bootstrap.php';
 // ==========================================================================
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 // Không để PHP in lỗi HTML ra làm hỏng JSON
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
@@ -22,4 +24,3 @@ set_exception_handler(function (Throwable $e) {
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth.php';
-

@@ -1,0 +1,390 @@
+[2026-10-20 08:44:58] To: tester_1792478698@example.com | Subject: Mã xác thực đăng ký tài khoản Bản đồ Cảnh báo
+
+        
+            
+                BẢN ĐỒ CẢNH BÁO GIAO THÔNG & NGẬP LỤT
+            
+
+            
+                Xin chào Nguyễn Văn Test,
+
+                Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất đăng ký, vui lòng sử dụng mã xác thực OTP dưới đây:
+
+                
+                    
+                        839632
+                    
+                
+
+                Mã xác thực có hiệu lực trong 15 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.
+
+                Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 08:45:12] To: debug_1792478712@test.com | Subject: Mã xác thực đăng ký tài khoản Bản đồ Cảnh báo
+
+        
+            
+                BẢN ĐỒ CẢNH BÁO GIAO THÔNG & NGẬP LỤT
+            
+
+            
+                Xin chào Debug User,
+
+                Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất đăng ký, vui lòng sử dụng mã xác thực OTP dưới đây:
+
+                
+                    
+                        397640
+                    
+                
+
+                Mã xác thực có hiệu lực trong 15 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.
+
+                Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 13:46:32] To: debug_1792478792@test.com | Subject: Mã xác thực đăng ký tài khoản Bản đồ Cảnh báo
+
+        
+            
+                BẢN ĐỒ CẢNH BÁO GIAO THÔNG & NGẬP LỤT
+            
+
+            
+                Xin chào Debug User,
+
+                Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất đăng ký, vui lòng sử dụng mã xác thực OTP dưới đây:
+
+                
+                    
+                        743823
+                    
+                
+
+                Mã xác thực có hiệu lực trong 15 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.
+
+                Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 13:47:04] To: tester_1792478824@example.com | Subject: Mã xác thực đăng ký tài khoản Bản đồ Cảnh báo
+
+        
+            
+                BẢN ĐỒ CẢNH BÁO GIAO THÔNG & NGẬP LỤT
+            
+
+            
+                Xin chào Nguyễn Văn Test,
+
+                Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất đăng ký, vui lòng sử dụng mã xác thực OTP dưới đây:
+
+                
+                    
+                        977728
+                    
+                
+
+                Mã xác thực có hiệu lực trong 15 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.
+
+                Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 13:47:31] To: tester_1792478851@example.com | Subject: Mã xác thực đăng ký tài khoản Bản đồ Cảnh báo
+
+        
+            
+                BẢN ĐỒ CẢNH BÁO GIAO THÔNG & NGẬP LỤT
+            
+
+            
+                Xin chào Nguyễn Văn Test,
+
+                Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất đăng ký, vui lòng sử dụng mã xác thực OTP dưới đây:
+
+                
+                    
+                        691351
+                    
+                
+
+                Mã xác thực có hiệu lực trong 15 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.
+
+                Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 13:47:33] To: tester_1792478851@example.com | Subject: Yêu cầu đặt lại mật khẩu - Bản đồ Cảnh báo
+
+        
+            
+                ĐẶT LẠI MẬT KHẨU TÀI KHOẢN
+            
+
+            
+                Xin chào Nguyễn Văn Test,
+
+                Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại Bản đồ Cảnh Báo.
+
+                
+                Bạn có thể nhập mã OTP đặt lại mật khẩu dưới đây:
+
+                
+                    
+                        732910
+                    
+                
+
+
+                
+                    
+                        Hoặc bấm vào đây để Đặt lại mật khẩu
+                    
+                
+
+
+                Cả mã OTP và liên kết trên sẽ hết hạn sau 15 phút.
+
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc liên hệ hỗ trợ.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 13:47:36] To: tester_1792478851@example.com | Subject: Yêu cầu đặt lại mật khẩu - Bản đồ Cảnh báo
+
+        
+            
+                ĐẶT LẠI MẬT KHẨU TÀI KHOẢN
+            
+
+            
+                Xin chào Nguyễn Văn Test,
+
+                Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại Bản đồ Cảnh Báo.
+
+                
+                Bạn có thể nhập mã OTP đặt lại mật khẩu dưới đây:
+
+                
+                    
+                        227203
+                    
+                
+
+
+                
+                    
+                        Hoặc bấm vào đây để Đặt lại mật khẩu
+                    
+                
+
+
+                Cả mã OTP và liên kết trên sẽ hết hạn sau 15 phút.
+
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc liên hệ hỗ trợ.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 13:48:15] To: tester_1792478895@example.com | Subject: Mã xác thực đăng ký tài khoản Bản đồ Cảnh báo
+
+        
+            
+                BẢN ĐỒ CẢNH BÁO GIAO THÔNG & NGẬP LỤT
+            
+
+            
+                Xin chào Nguyễn Văn Test,
+
+                Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất đăng ký, vui lòng sử dụng mã xác thực OTP dưới đây:
+
+                
+                    
+                        472346
+                    
+                
+
+                Mã xác thực có hiệu lực trong 15 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.
+
+                Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 13:48:17] To: tester_1792478895@example.com | Subject: Yêu cầu đặt lại mật khẩu - Bản đồ Cảnh báo
+
+        
+            
+                ĐẶT LẠI MẬT KHẨU TÀI KHOẢN
+            
+
+            
+                Xin chào Nguyễn Văn Test,
+
+                Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại Bản đồ Cảnh Báo.
+
+                
+                Bạn có thể nhập mã OTP đặt lại mật khẩu dưới đây:
+
+                
+                    
+                        219685
+                    
+                
+
+
+                
+                    
+                        Hoặc bấm vào đây để Đặt lại mật khẩu
+                    
+                
+
+
+                Cả mã OTP và liên kết trên sẽ hết hạn sau 15 phút.
+
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc liên hệ hỗ trợ.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 13:48:20] To: tester_1792478895@example.com | Subject: Yêu cầu đặt lại mật khẩu - Bản đồ Cảnh báo
+
+        
+            
+                ĐẶT LẠI MẬT KHẨU TÀI KHOẢN
+            
+
+            
+                Xin chào Nguyễn Văn Test,
+
+                Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại Bản đồ Cảnh Báo.
+
+                
+                Bạn có thể nhập mã OTP đặt lại mật khẩu dưới đây:
+
+                
+                    
+                        393610
+                    
+                
+
+
+                
+                    
+                        Hoặc bấm vào đây để Đặt lại mật khẩu
+                    
+                
+
+
+                Cả mã OTP và liên kết trên sẽ hết hạn sau 15 phút.
+
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc liên hệ hỗ trợ.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 15:17:27] To: admin@trafficmap.vn | Subject: Yêu cầu đặt lại mật khẩu - Bản đồ Cảnh báo
+
+        
+            
+                ĐẶT LẠI MẬT KHẨU TÀI KHOẢN
+            
+
+            
+                Xin chào admin_super,
+
+                Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại Bản đồ Cảnh Báo.
+
+                
+                Bạn có thể nhập mã OTP đặt lại mật khẩu dưới đây:
+
+                
+                    
+                        289771
+                    
+                
+
+
+                
+                    
+                        Hoặc bấm vào đây để Đặt lại mật khẩu
+                    
+                
+
+
+                Cả mã OTP và liên kết trên sẽ hết hạn sau 15 phút.
+
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc liên hệ hỗ trợ.
+
+            
+
+        
+
+----------------------------------------
+[2026-10-20 15:24:00] To: coco83868386@gmail.com | Subject: Yêu cầu đặt lại mật khẩu - Bản đồ Cảnh báo
+
+        
+            
+                ĐẶT LẠI MẬT KHẨU TÀI KHOẢN
+            
+
+            
+                Xin chào Khánh,
+
+                Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại Bản đồ Cảnh Báo.
+
+                
+                Bạn có thể nhập mã OTP đặt lại mật khẩu dưới đây:
+
+                
+                    
+                        307535
+                    
+                
+
+
+                
+                    
+                        Hoặc bấm vào đây để Đặt lại mật khẩu
+                    
+                
+
+
+                Cả mã OTP và liên kết trên sẽ hết hạn sau 15 phút.
+
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc liên hệ hỗ trợ.
+
+            
+
+        
+
+----------------------------------------

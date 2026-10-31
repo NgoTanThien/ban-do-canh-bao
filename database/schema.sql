@@ -9,12 +9,18 @@ USE `traffic_map_db`;
 CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `username` VARCHAR(50) NOT NULL UNIQUE,
+    `full_name` VARCHAR(100) NULL,
+    `avatar` VARCHAR(255) NULL,
     `email` VARCHAR(100) NOT NULL UNIQUE,
+    `google_id` VARCHAR(100) NULL,
+    `phone` VARCHAR(20) NULL,
     `password` VARCHAR(255) NOT NULL,
     `role` ENUM('user', 'admin') DEFAULT 'user',
     `status` ENUM('active', 'blocked') DEFAULT 'active',
+    `is_verified` TINYINT(1) DEFAULT 0,
     `reputation_score` INT DEFAULT 10, -- Điểm uy tín (trừ điểm nếu báo tin giả)
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_google_id` (`google_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `reports` (
@@ -56,3 +62,29 @@ CREATE TABLE IF NOT EXISTS `report_votes` (
     UNIQUE KEY `unique_user_report_vote` (`report_id`, `user_id`)
 ) ENGINE=InnoDB;
 
+-- Token ghi nhớ đăng nhập (Remember Me 30 ngày) và đặt lại mật khẩu
+CREATE TABLE IF NOT EXISTS `user_tokens` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `token_hash` VARCHAR(64) NOT NULL,
+    `type` ENUM('remember_me', 'reset_password') NOT NULL,
+    `expires_at` DATETIME NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT `fk_tokens_user` FOREIGN KEY (`user_id`)
+        REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_token_type` (`token_hash`, `type`)
+) ENGINE=InnoDB;
+
+-- Mã OTP xác thực email khi đăng ký hoặc đặt lại mật khẩu
+CREATE TABLE IF NOT EXISTS `email_otps` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `email` VARCHAR(100) NOT NULL,
+    `otp_code` VARCHAR(10) NOT NULL,
+    `action` ENUM('register', 'reset_password') NOT NULL,
+    `data` TEXT NULL,
+    `expires_at` DATETIME NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX `idx_email_action` (`email`, `action`)
+) ENGINE=InnoDB;

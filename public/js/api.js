@@ -5,10 +5,11 @@
 const API_BASE = 'api/';
 
 class ApiError extends Error {
-    constructor(message, status = 0) {
+    constructor(message, status = 0, data = null) {
         super(message);
         this.name = 'ApiError';
         this.status = status; // Mã HTTP (401: chưa đăng nhập, 403: bị khóa,...)
+        this.data = data;
     }
 }
 
@@ -44,24 +45,33 @@ async function apiRequest(endpoint, { method = 'GET', body = null, query = null 
     }
 
     if (!json || json.status !== 'success') {
-        throw new ApiError((json && json.message) || `Lỗi máy chủ (${res.status})`, res.status);
+        throw new ApiError(
+            (json && json.message) || `Lỗi máy chủ (${res.status})`, 
+            res.status, 
+            json ? json.data : null
+        );
     }
-    return json.data;
+    return json.data !== undefined ? json.data : json;
 }
 
 const Api = {
     // --- Xác thực tài khoản ---
-    me:        ()              => apiRequest('me.php'),
-    login:     (account, pass) => apiRequest('login.php', { method: 'POST', body: { username_or_email: account, password: pass } }),
-    register:  (data)          => apiRequest('register.php', { method: 'POST', body: data }),
-    logout:    ()              => apiRequest('logout.php', { method: 'POST' }),
+    me:                ()                           => apiRequest('me.php'),
+    login:             (account, pass, rememberMe)  => apiRequest('login.php', { method: 'POST', body: { username_or_email: account, password: pass, remember_me: !!rememberMe } }),
+    googleLogin:       (data)                       => apiRequest('google_login.php', { method: 'POST', body: data }),
+    register:          (data)                       => apiRequest('register.php', { method: 'POST', body: data }),
+    verifyRegisterOtp: (email, otp)                 => apiRequest('register_verify.php', { method: 'POST', body: { email, otp } }),
+    checkEmail:        (email)                      => apiRequest('check_email.php', { query: { email } }),
+    forgotPassword:    (email)                      => apiRequest('forgot_password.php', { method: 'POST', body: { email } }),
+    resetPassword:     (data)                       => apiRequest('reset_password.php', { method: 'POST', body: data }),
+    logout:            ()                           => apiRequest('logout.php', { method: 'POST' }),
 
     // --- Báo cáo sự cố & Bản đồ ---
-    reports:   (type = 'all')  => apiRequest('reports.php', { query: { type } }),
-    addReport: (formData)      => apiRequest('reports.php', { method: 'POST', body: formData }),
-    vote:      (id, voteType)  => apiRequest('vote.php', { method: 'POST', body: { report_id: id, vote_type: voteType } }),
+    reports:           (type = 'all')               => apiRequest('reports.php', { query: { type } }),
+    addReport:         (formData)                   => apiRequest('reports.php', { method: 'POST', body: formData }),
+    vote:              (id, voteType)               => apiRequest('vote.php', { method: 'POST', body: { report_id: id, vote_type: voteType } }),
 
     // --- Quản trị Admin ---
-    adminUsers:      ()               => apiRequest('admin/users.php'),
-    adminUserStatus: (userId, action) => apiRequest('admin/user_status.php', { method: 'POST', body: { user_id: userId, action } }),
+    adminUsers:        ()                           => apiRequest('admin/users.php'),
+    adminUserStatus:   (userId, action)             => apiRequest('admin/user_status.php', { method: 'POST', body: { user_id: userId, action } }),
 };

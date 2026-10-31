@@ -34,10 +34,10 @@ if (file_exists($googleConfigFile)) {
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 
-    <!-- Style CSS -->
-    <link rel="stylesheet" href="public/css/style.css">
+    <!-- Style CSS (Có tham số version động để chống lưu cache trình duyệt cũ) -->
+    <link rel="stylesheet" href="public/css/style.css?v=<?= file_exists(__DIR__ . '/../../public/css/style.css') ? filemtime(__DIR__ . '/../../public/css/style.css') : time() ?>">
     <!-- Firebase Auth Web SDK (Google Sign-In) -->
-    <script type="module" src="public/js/firebase-auth.js"></script>
+    <script type="module" src="public/js/firebase-auth.js?v=<?= time() ?>"></script>
 </head>
 <body>
 

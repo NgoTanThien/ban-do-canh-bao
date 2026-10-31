@@ -468,7 +468,7 @@ $isAdminRoute = (isset($_GET['route']) && $_GET['route'] === 'admin_login') || i
         </div>
     </div>
 
-    <script src="public/js/api.js"></script>
+    <script src="public/js/api.js?v=<?= time() ?>"></script>
     <script>
         function showToast(msg, isSuccess = true) {
             const old = document.getElementById('toast');

@@ -264,9 +264,7 @@ require_once __DIR__ . '/../../config/google.php';
                 </div>
             </div>
 
-            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed #dce0e3; text-align: center; font-size: 13px; color: #64748b;">
-                Quản trị viên hệ thống? <a href="index.php?route=admin_login" style="color: #2563eb; font-weight: 700; text-decoration: none;">Đăng nhập Admin &rarr;</a>
-            </div>
+            
         </div>
 
         <!-- 2. FORM NHẬP EMAIL / SỐ ĐIỆN THOẠI (BƯỚC 1) -->
@@ -386,7 +384,7 @@ require_once __DIR__ . '/../../config/google.php';
         </div>
     </div>
 
-    <script src="public/js/api.js"></script>
+    <script src="public/js/api.js?v=<?= time() ?>"></script>
     <script>
         let regDataPayload = {};
 

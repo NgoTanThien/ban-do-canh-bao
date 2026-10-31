@@ -30,3 +30,4 @@ if ($stmt->execute()) {
 } else {
     json_error('Không thể gửi yêu cầu SOS, vui lòng gọi trực tiếp hotline 1900 1088!', 500);
 }
+

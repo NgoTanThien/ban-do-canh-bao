@@ -233,8 +233,8 @@
         const currentUserRole = <?= isset($_SESSION['role']) ? json_encode($_SESSION['role']) : '"guest"'; ?>;
     </script>
 
-    <!-- API Client & JS Bản đồ -->
-    <script src="public/js/api.js"></script>
-    <script src="public/js/map.js"></script>
+    <!-- API Client & JS Bản đồ (Có tham số version động để chống lưu cache trình duyệt cũ) -->
+    <script src="public/js/api.js?v=<?= file_exists(__DIR__ . '/../../public/js/api.js') ? filemtime(__DIR__ . '/../../public/js/api.js') : time() ?>"></script>
+    <script src="public/js/map.js?v=<?= file_exists(__DIR__ . '/../../public/js/map.js') ? filemtime(__DIR__ . '/../../public/js/map.js') : time() ?>"></script>
 </body>
 </html>

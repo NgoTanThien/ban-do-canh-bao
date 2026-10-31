@@ -1,8 +1,8 @@
 <!-- KHUNG THANH ĐIỀU HƯỚNG BÊN TRÁI URBAN GUARD -->
-<div class="sidebar" id="sidebar">
+<div class="sidebar" id="sidebar" style="position: fixed; top: 0; left: 0; bottom: 0; height: 100vh; max-height: 100vh; overflow: hidden; display: flex; flex-direction: column; width: 360px; max-width: 88vw; z-index: 2001;">
     <!-- 1. Menu Chính của Sidebar -->
-    <div id="sidebar-main" style="display: flex; flex-direction: column; height: 100%;">
-        <div class="sidebar-header">
+    <div id="sidebar-main" style="display: flex; flex-direction: column; height: 100%; max-height: 100%; overflow: hidden; flex: 1; min-height: 0;">
+        <div class="sidebar-header" style="flex-shrink: 0;">
             <div class="sidebar-brand">
                 <div class="logo-icon">
                     <i class="ph-bold ph-shield-check"></i>
@@ -17,69 +17,70 @@
             </button>
         </div>
         
-        <div class="sidebar-menu">
-            <a href="#" class="menu-item" onclick="openRoutingModal(); toggleSidebar(); return false;">
-                <i class="ph-bold ph-navigation-arrow" style="color: #10b981;"></i>
-                <span>Tìm đường né ngập</span>
-                <span class="badge-pill green">AI</span>
-            </a>
-            <a href="#" class="menu-item" onclick="openWeatherModal(); toggleSidebar(); return false;">
-                <i class="ph-bold ph-cloud-rain" style="color: #38bdf8;"></i>
-                <span>Dự báo ngập & Thủy triều</span>
-                <span class="badge-pill blue">1-3h</span>
-            </a>
-            <a href="#" class="menu-item" onclick="openSosModal(); toggleSidebar(); return false;">
-                <i class="ph-bold ph-first-aid" style="color: #ef4444;"></i>
-                <span>Cứu hộ khẩn cấp SOS</span>
-                <span class="badge-pill red">Hotline</span>
-            </a>
-            <a href="#" class="menu-item" onclick="openSubPanel('Chú giải chuẩn 4 cấp', 'legend'); return false;">
-                <i class="ph ph-list-dashes"></i>
-                <span>Chú giải chuẩn 4 cấp</span>
-            </a>
-            <a href="#" class="menu-item" onclick="openSubPanel('Điểm nóng giao thông', 'news'); return false;">
-                <i class="ph ph-article"></i>
-                <span>Điểm nóng giao thông</span>
-            </a>
-            <a href="#" class="menu-item" onclick="openSubPanel('Radar cảnh báo GPS', 'follow'); return false;">
-                <i class="ph-bold ph-radar" style="color: #38bdf8;"></i>
-                <span>Radar cảnh báo GPS</span>
-                <span class="badge-pill red">Mới</span>
-            </a>
+        <!-- Thân Sidebar có thanh cuộn mượt mà (Scrollable Body) giúp không bao giờ bị che mất thông tin bên dưới -->
+        <div class="sidebar-body" style="flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; display: flex; flex-direction: column;">
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item" onclick="openRoutingModal(); toggleSidebar(); return false;">
+                    <i class="ph-bold ph-navigation-arrow" style="color: #10b981;"></i>
+                    <span>Tìm đường né ngập</span>
+                    <span class="badge-pill green">AI</span>
+                </a>
+                <a href="#" class="menu-item" onclick="openWeatherModal(); toggleSidebar(); return false;">
+                    <i class="ph-bold ph-cloud-rain" style="color: #38bdf8;"></i>
+                    <span>Dự báo ngập & Thủy triều</span>
+                    <span class="badge-pill blue">1-3h</span>
+                </a>
+                <a href="#" class="menu-item" onclick="openSosModal(); toggleSidebar(); return false;">
+                    <i class="ph-bold ph-first-aid" style="color: #ef4444;"></i>
+                    <span>Cứu hộ khẩn cấp SOS</span>
+                    <span class="badge-pill red">Hotline</span>
+                </a>
+                <a href="#" class="menu-item" onclick="openSubPanel('Chú giải chuẩn 4 cấp', 'legend'); return false;">
+                    <i class="ph ph-list-dashes"></i>
+                    <span>Chú giải chuẩn 4 cấp</span>
+                </a>
+                <a href="#" class="menu-item" onclick="openSubPanel('Điểm nóng giao thông', 'news'); return false;">
+                    <i class="ph ph-article"></i>
+                    <span>Điểm nóng giao thông</span>
+                </a>
+                <a href="#" class="menu-item" onclick="openSubPanel('Radar cảnh báo GPS', 'follow'); return false;">
+                    <i class="ph-bold ph-radar" style="color: #38bdf8;"></i>
+                    <span>Radar cảnh báo GPS</span>
+                    <span class="badge-pill red">Mới</span>
+                </a>
 
-            <?php if (isset($_SESSION['user_id'])): ?>
-            <a href="#" class="menu-item" onclick="openSubPanel('Báo cáo của tôi', 'my_reports'); return false;">
-                <i class="ph-bold ph-clock-counter-clockwise" style="color: #60a5fa;"></i>
-                <span>Báo cáo của tôi</span>
-            </a>
-            <a href="#" class="menu-item" onclick="openSubPanel('Hồ sơ & Đổi mật khẩu', 'profile'); return false;">
-                <i class="ph-bold ph-user-gear" style="color: #34d399;"></i>
-                <span>Hồ sơ & Bảo mật</span>
-            </a>
-            <?php endif; ?>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="#" class="menu-item" onclick="openSubPanel('Báo cáo của tôi', 'my_reports'); return false;">
+                    <i class="ph-bold ph-clock-counter-clockwise" style="color: #60a5fa;"></i>
+                    <span>Báo cáo của tôi</span>
+                </a>
+                <a href="#" class="menu-item" onclick="openSubPanel('Hồ sơ & Đổi mật khẩu', 'profile'); return false;">
+                    <i class="ph-bold ph-user-gear" style="color: #34d399;"></i>
+                    <span>Hồ sơ & Bảo mật</span>
+                </a>
+                <?php endif; ?>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-links">
+                <a href="#" onclick="openLayerSwitcherModal(); toggleSidebar(); return false;">
+                    <i class="ph ph-stack"></i> Quản lý lớp bản đồ GIS
+                </a>
+                <a href="#" onclick="openSubPanel('Góp ý xây dựng', 'feedback'); return false;">
+                    <i class="ph ph-chat-teardrop-dots"></i> Góp ý phát triển
+                </a>
+                <a href="#" onclick="openSubPanel('Hướng dẫn sử dụng', 'guide'); return false;">
+                    <i class="ph ph-question"></i> Hướng dẫn & An toàn
+                </a>
+                <a href="#" onclick="openSubPanel('Nhật ký cập nhật', 'changelog'); return false;">
+                    <i class="ph ph-sparkle"></i> Phiên bản UrbanGuard 2.0
+                </a>
+            </div>
         </div>
 
-        <div class="sidebar-divider"></div>
-
-        <div class="sidebar-links">
-            <a href="#" onclick="openLayerSwitcherModal(); toggleSidebar(); return false;">
-                <i class="ph ph-stack"></i> Quản lý lớp bản đồ GIS
-            </a>
-            <a href="#" onclick="openSubPanel('Góp ý xây dựng', 'feedback'); return false;">
-                <i class="ph ph-chat-teardrop-dots"></i> Góp ý phát triển
-            </a>
-            <a href="#" onclick="openSubPanel('Hướng dẫn sử dụng', 'guide'); return false;">
-                <i class="ph ph-question"></i> Hướng dẫn & An toàn
-            </a>
-            <a href="#" onclick="openSubPanel('Nhật ký cập nhật', 'changelog'); return false;">
-                <i class="ph ph-sparkle"></i> Phiên bản UrbanGuard 2.0
-            </a>
-        </div>
-        
-        <div class="sidebar-divider"></div>
-
-        <!-- Phần thông tin tài khoản ở chân Sidebar -->
-        <div class="sidebar-footer" style="display:flex; flex-direction:column; gap:12px;">
+        <!-- Phần thông tin tài khoản luôn ghim cố định ở chân Sidebar (Không bị che khuất) -->
+        <div class="sidebar-footer" style="flex-shrink: 0; margin-top: auto; padding: 12px 16px 22px 16px; border-top: 1px solid #27272a; background: #18181b; display: flex; flex-direction: column; gap: 8px; z-index: 10; box-shadow: 0 -4px 14px rgba(0,0,0,0.4);">
             <?php if (isset($_SESSION['user_id'])): 
                 $userRepScore = 10;
                 if (isset($conn) && isset($_SESSION['user_id'])) {
@@ -89,7 +90,7 @@
                     }
                 }
             ?>
-                <div style="background: rgba(39, 39, 42, 0.7); border: 1px solid #3f3f46; border-radius: 12px; padding: 10px 12px;">
+                <div style="background: rgba(39, 39, 42, 0.75); border: 1px solid #3f3f46; border-radius: 12px; padding: 10px 12px;">
                     <div style="display: flex; align-items: center; justify-content: space-between;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <i class="ph-bold ph-user-circle" style="font-size: 1.4rem; color: #38bdf8;"></i>
@@ -108,17 +109,17 @@
                 </div>
                 
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <a href="index.php?route=admin_dashboard" style="color: #38bdf8; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                    <a href="index.php?route=admin_dashboard" style="color: #38bdf8; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 6px; padding: 2px 0;">
                         <i class="ph-bold ph-shield-check" style="color: #38bdf8;"></i> Bảng Quản Trị Viên (Admin) &rarr;
                     </a>
                 <?php endif; ?>
                 
                 <!-- Nút Đăng xuất: Logout ra nhưng reload trang index (bản đồ chính) -->
-                <a href="index.php?route=logout" onclick="localStorage.removeItem('currentUser');" style="color: #ef4444; font-weight: 600; font-size: 0.95rem; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <a href="index.php?route=logout" onclick="localStorage.removeItem('currentUser');" style="color: #ef4444; font-weight: 600; font-size: 0.95rem; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 2px 0;">
                     <i class="ph-bold ph-sign-out"></i> Đăng xuất
                 </a>
             <?php else: ?>
-                <a href="#" onclick="openSubPanel('Đăng nhập tài khoản', 'login')" style="color: #60a5fa; font-weight: 600; font-size: 1rem; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                <a href="#" onclick="openSubPanel('Đăng nhập tài khoản', 'login')" style="color: #60a5fa; font-weight: 600; font-size: 1rem; text-decoration: none; display: flex; align-items: center; gap: 8px; padding: 4px 0;">
                     <i class="ph-bold ph-user-circle" style="font-size: 1.3rem;"></i> Đăng nhập / Đăng ký
                 </a>
             <?php endif; ?>
@@ -126,8 +127,8 @@
     </div>
 
     <!-- 2. Khung Sub-Panel Trượt vào (Hiển thị chi tiết theo từng tính năng) -->
-    <div id="sidebar-sub" style="display: none; flex-direction: column; height: 100%;">
-        <div class="sidebar-header" style="justify-content: flex-start; gap: 12px;">
+    <div id="sidebar-sub" style="display: none; flex-direction: column; height: 100%; overflow: hidden;">
+        <div class="sidebar-header" style="justify-content: flex-start; gap: 12px; flex-shrink: 0;">
             <button class="btn-close-sidebar" onclick="closeSubPanel()" title="Quay lại">
                 <i class="ph ph-caret-left"></i>
             </button>
@@ -136,14 +137,14 @@
                 <i class="ph ph-x"></i>
             </button>
         </div>
-        <div class="sidebar-sub-content" id="sub-content">
+        <div class="sidebar-sub-content" id="sub-content" style="flex: 1; overflow-y: auto; padding: 16px;">
             <!-- Nội dung động được render bằng JavaScript -->
         </div>
     </div>
 
     <!-- 3. Khung Báo Cáo Sự Cố Nhanh (3 Chạm Sáng Rõ & Đầy Đủ Tương Phản) -->
-    <div id="sidebar-report" style="display: none; flex-direction: column; height: 100%;">
-        <div class="sidebar-header" style="justify-content: flex-start; gap: 12px;">
+    <div id="sidebar-report" style="display: none; flex-direction: column; height: 100%; overflow: hidden;">
+        <div class="sidebar-header" style="justify-content: flex-start; gap: 12px; flex-shrink: 0;">
             <button type="button" class="btn-close-sidebar" onclick="closeReportPanel()" title="Quay lại">
                 <i class="ph ph-caret-left"></i>
             </button>
@@ -152,7 +153,7 @@
                 <i class="ph ph-x"></i>
             </button>
         </div>
-        <div class="sidebar-sub-content" style="padding: 16px; overflow-y: auto;">
+        <div class="sidebar-sub-content" style="flex: 1; padding: 16px; overflow-y: auto;">
             <?php if (!isset($_SESSION['user_id'])): ?>
                 <div style="text-align: center; padding: 40px 10px; color: #a1a1aa;">
                     <i class="ph-bold ph-lock-key" style="font-size: 2.8rem; color: #f59e0b; margin-bottom: 12px; display: block;"></i>
@@ -173,27 +174,27 @@
                         <label class="report-form-label"><span class="step-num">1</span> Loại sự cố đô thị:</label>
                         <div class="incident-type-selector">
                             <label class="incident-radio-card active">
-                                <input type="radio" name="type" value="ngap_nuoc" checked onchange="toggleReportTypeFields('ngap_nuoc')">
+                                <input type="radio" name="type" value="ngap_nuoc" checked onchange="toggleReportTypeFields('ngap_nuoc')" style="display:none;">
                                 <i class="ph-bold ph-waves" style="color: #60a5fa; font-size: 1.4rem;"></i>
                                 <span>Ngập lụt</span>
                             </label>
                             <label class="incident-radio-card">
-                                <input type="radio" name="type" value="ket_xe" onchange="toggleReportTypeFields('ket_xe')">
+                                <input type="radio" name="type" value="ket_xe" onchange="toggleReportTypeFields('ket_xe')" style="display:none;">
                                 <i class="ph-bold ph-car" style="color: #fb923c; font-size: 1.4rem;"></i>
                                 <span>Kẹt xe</span>
                             </label>
                             <label class="incident-radio-card">
-                                <input type="radio" name="type" value="cay_do" onchange="toggleReportTypeFields('cay_do')">
+                                <input type="radio" name="type" value="cay_do" onchange="toggleReportTypeFields('cay_do')" style="display:none;">
                                 <i class="ph-bold ph-tree" style="color: #22c55e; font-size: 1.4rem;"></i>
                                 <span>Cây đổ</span>
                             </label>
                             <label class="incident-radio-card">
-                                <input type="radio" name="type" value="tai_nan" onchange="toggleReportTypeFields('tai_nan')">
+                                <input type="radio" name="type" value="tai_nan" onchange="toggleReportTypeFields('tai_nan')" style="display:none;">
                                 <i class="ph-bold ph-warning-octagon" style="color: #ef4444; font-size: 1.4rem;"></i>
                                 <span>Tai nạn</span>
                             </label>
                             <label class="incident-radio-card">
-                                <input type="radio" name="type" value="rao_chan" onchange="toggleReportTypeFields('rao_chan')">
+                                <input type="radio" name="type" value="rao_chan" onchange="toggleReportTypeFields('rao_chan')" style="display:none;">
                                 <i class="ph-bold ph-barrier" style="color: #eab308; font-size: 1.4rem;"></i>
                                 <span>Rào chắn</span>
                             </label>
@@ -205,7 +206,7 @@
                         <label class="report-form-label"><span class="step-num">2</span> Ước lượng mức nước trực quan:</label>
                         <div class="visual-level-selector">
                             <label class="visual-level-card active">
-                                <input type="radio" name="water_level_visual" value="mat_ca" checked>
+                                <input type="radio" name="water_level_visual" value="mat_ca" checked style="display:none;">
                                 <div>
                                     <strong style="color: #ffffff; font-size: 0.9rem; display: block;">Ngang mắt cá chân</strong>
                                     <span style="color: #94a3b8; font-size: 0.78rem;">Xe máy đi bình thường</span>
@@ -213,7 +214,7 @@
                                 <span class="depth-tag yellow">~10 - 15cm (Ngập nhẹ)</span>
                             </label>
                             <label class="visual-level-card">
-                                <input type="radio" name="water_level_visual" value="banh_xe">
+                                <input type="radio" name="water_level_visual" value="banh_xe" style="display:none;">
                                 <div>
                                     <strong style="color: #ffffff; font-size: 0.9rem; display: block;">Nửa bánh xe máy</strong>
                                     <span style="color: #94a3b8; font-size: 0.78rem;">Khuyên xe ga không nên đi</span>
@@ -221,12 +222,12 @@
                                 <span class="depth-tag orange">~20 - 25cm (Nguy hiểm)</span>
                             </label>
                             <label class="visual-level-card">
-                                <input type="radio" name="water_level_visual" value="yen_xe">
+                                <input type="radio" name="water_level_visual" value="yen_xe" style="display:none;">
                                 <div>
                                     <strong style="color: #ffffff; font-size: 0.9rem; display: block;">Ngập ống xả / Yên xe</strong>
                                     <span style="color: #94a3b8; font-size: 0.78rem;">Đóng đường hoàn toàn</span>
                                 </div>
-                                <span class="depth-tag red">>40 - 50cm (Chết máy)</span>
+                                <span class="depth-tag red">&gt;40 - 50cm (Chết máy)</span>
                             </label>
                         </div>
                     </div>
@@ -235,7 +236,7 @@
                         <label class="report-form-label"><span class="step-num">2</span> Tình trạng lưu thông:</label>
                         <div class="visual-level-selector">
                             <label class="visual-level-card active">
-                                <input type="radio" name="traffic_speed_visual" value="cham" checked>
+                                <input type="radio" name="traffic_speed_visual" value="cham" checked style="display:none;">
                                 <div>
                                     <strong style="color: #ffffff; font-size: 0.9rem; display: block;">Di chuyển chậm</strong>
                                     <span style="color: #94a3b8; font-size: 0.78rem;">Xe đông nối đuôi</span>
@@ -243,7 +244,7 @@
                                 <span class="depth-tag yellow">15 - 25 km/h</span>
                             </label>
                             <label class="visual-level-card">
-                                <input type="radio" name="traffic_speed_visual" value="un_u">
+                                <input type="radio" name="traffic_speed_visual" value="un_u" style="display:none;">
                                 <div>
                                     <strong style="color: #ffffff; font-size: 0.9rem; display: block;">Ùn ứ nặng kéo dài</strong>
                                     <span style="color: #94a3b8; font-size: 0.78rem;">Di chuyển từng mét</span>
@@ -251,12 +252,12 @@
                                 <span class="depth-tag orange">5 - 15 km/h</span>
                             </label>
                             <label class="visual-level-card">
-                                <input type="radio" name="traffic_speed_visual" value="tac_nghen">
+                                <input type="radio" name="traffic_speed_visual" value="tac_nghen" style="display:none;">
                                 <div>
                                     <strong style="color: #ffffff; font-size: 0.9rem; display: block;">Tắc nghẽn bất động</strong>
                                     <span style="color: #94a3b8; font-size: 0.78rem;">Chôn chân tại chỗ</span>
                                 </div>
-                                <span class="depth-tag red"><5 km/h (Chôn chân)</span>
+                                <span class="depth-tag red">&lt;5 km/h (Chôn chân)</span>
                             </label>
                         </div>
                     </div>

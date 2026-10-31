@@ -2361,6 +2361,32 @@ function handleMapClickForRoute(lat, lng) {
     return true;
 }
 
+// Hàm định tuyến an toàn kép (Dual-safe Routing: Hỗ trợ cả Api.routing lẫn OSRM Engine trực tiếp)
+async function getSmartRouteCoordinates(start, end) {
+    if (typeof window.Api !== 'undefined' && typeof window.Api.routing === 'function') {
+        try {
+            const res = await window.Api.routing(start, end);
+            if (res && res.routes && res.routes.length > 0) return res;
+        } catch (e) {
+            console.warn('Api.routing error, switching to direct OSRM:', e);
+        }
+    }
+    try {
+        const startCoord = Array.isArray(start) ? `${start[1]},${start[0]}` : `${start.lng},${start.lat}`;
+        const endCoord = Array.isArray(end) ? `${end[1]},${end[0]}` : `${end.lng},${end.lat}`;
+        const url = `https://router.project-osrm.org/route/v1/driving/${startCoord};${endCoord}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        return await res.json();
+    } catch (e) {
+        console.warn('Lỗi kết nối OSRM trực tiếp:', e);
+        return null;
+    }
+}
+
+// Luôn đăng ký hàm routing vào đối tượng toàn cục
+window.Api = window.Api || {};
+window.Api.routing = getSmartRouteCoordinates;
+
 async function calculateSmartRoute() {
     if (!routeFromCoords) {
         useMyLocationForRoute('from');
@@ -2374,7 +2400,7 @@ async function calculateSmartRoute() {
     showToast('AI đang phân tích lộ trình né điểm ngập...', true);
 
     try {
-        const routeData = await Api.routing(routeFromCoords, routeToCoords);
+        const routeData = await getSmartRouteCoordinates(routeFromCoords, routeToCoords);
         if (!routeData || !routeData.routes || routeData.routes.length === 0) {
             showToast('Không tìm thấy đường đi khả dụng giữa 2 điểm!', false);
             return;

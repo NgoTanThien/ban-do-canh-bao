@@ -795,37 +795,6 @@ function openSubPanel(title, type, extraData = {}) {
                     </form>
                 </div>
 
-                <!-- Form đăng nhập Admin khi bấm Cổng Quản trị viên -->
-                <div id="adminLoginSectionMap" style="display:none; text-align:left;">
-                    <button type="button" class="f8-btn-back" onclick="document.getElementById('adminLoginSectionMap').style.display='none'; document.getElementById('loginMethodsList').style.display='flex';">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                        Quay lại Đăng nhập người dùng
-                    </button>
-
-                    <div style="text-align:center; margin-bottom:14px;">
-                        <span style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:9999px;">
-                            🛡️ CỔNG QUẢN TRỊ VIÊN (ADMIN)
-                        </span>
-                    </div>
-
-                    <form onsubmit="handleAdminLoginFromMap(event)" style="display:flex; flex-direction:column; gap:12px;">
-                        <div>
-                            <label style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:4px; display:block;">Tài khoản Admin</label>
-                            <input type="text" id="mapAdminAccount" value="admin_super" class="f8-form-input" required autocomplete="username">
-                        </div>
-                        <div>
-                            <label style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:4px; display:block;">Mật khẩu Admin</label>
-                            <input type="password" id="mapAdminPassword" placeholder="Nhập mật khẩu" class="f8-form-input" required autocomplete="current-password">
-                        </div>
-
-                        <button type="submit" id="btnMapAdminSubmit" class="f8-submit-btn" style="background:linear-gradient(135deg, #0f172a, #1e293b);">
-                            Đăng nhập Quản trị viên
-                        </button>
-                    </form>
-                </div>
-
                 <!-- Liên kết điều hướng bên dưới -->
                 <div style="margin-top:24px; text-align:center; font-size:13.5px; color:#35414c;">
                     <div>
@@ -834,13 +803,6 @@ function openSubPanel(title, type, extraData = {}) {
                     <div style="margin-top:12px;">
                         <a href="#" onclick="openSubPanel('Quên mật khẩu?', 'forgot_password'); return false;" style="color:#2563eb; font-weight:700; text-decoration:underline;">Quên mật khẩu?</a>
                     </div>
-                </div>
-
-                <!-- PHẦN ĐĂNG NHẬP DÀNH CHO ADMIN -->
-                <div style="margin-top:20px; padding-top:14px; border-top:1px dashed #dce0e3; text-align:center;">
-                    <a href="#" onclick="document.getElementById('loginMethodsList').style.display='none'; document.getElementById('loginFormSection').style.display='none'; document.getElementById('adminLoginSectionMap').style.display='block'; return false;" style="color:#2563eb; font-size:13px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
-                        🛡️ Đăng nhập Quản trị viên (Admin) &rarr;
-                    </a>
                 </div>
             </div>`;
     }
@@ -1307,6 +1269,178 @@ function openSubPanel(title, type, extraData = {}) {
                 </p>
             </div>
         `;
+    }
+
+    // PANEL: BÁO CÁO CỦA TÔI
+    else if (type === 'my_reports') {
+        contentDiv.innerHTML = `
+            <div style="text-align:center; padding:30px 10px; color:#a1a1aa;">
+                <div class="pulse-dot green" style="display:inline-block; margin-bottom:12px;"></div>
+                <p>Đang tải lịch sử báo cáo của bạn...</p>
+            </div>
+        `;
+        (async () => {
+            try {
+                const reports = await Api.myReports();
+                if (!Array.isArray(reports) || reports.length === 0) {
+                    contentDiv.innerHTML = `
+                        <div style="text-align:center; padding:40px 16px; color:#a1a1aa;">
+                            <i class="ph-light ph-folder-open" style="font-size:3rem; color:#60a5fa; margin-bottom:10px;"></i>
+                            <h4 style="color:white; margin-bottom:6px; font-size:1.05rem;">Chưa có báo cáo nào</h4>
+                            <p style="font-size:0.85rem; line-height:1.5; margin-bottom:20px;">
+                                Bạn chưa đóng góp báo cáo điểm ngập hoặc kẹt xe nào cho cộng đồng.
+                            </p>
+                            <button type="button" onclick="openReportSheet()" style="background:#2563eb; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">
+                                <i class="ph-bold ph-plus-circle"></i> Báo sự cố ngay
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="panel-card" style="background:linear-gradient(135deg, rgba(37,99,235,0.15), rgba(15,23,42,0.9)); border:1px solid #3b82f6; padding:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:white; font-weight:700; font-size:0.95rem;">
+                                    <i class="ph-bold ph-trophy" style="color:#fbbf24; margin-right:4px;"></i> Đóng góp cộng đồng
+                                </span>
+                                <span style="background:#2563eb; color:white; font-size:0.85rem; font-weight:700; padding:2px 10px; border-radius:20px;">
+                                    ${reports.length} báo cáo
+                                </span>
+                            </div>
+                        </div>
+                `;
+
+                reports.forEach(r => {
+                    const isFlood = (r.type === 'ngap_nuoc' || r.report_type === 'flood');
+                    const lat = parseFloat(r.latitude);
+                    const lng = parseFloat(r.longitude);
+                    const titleText = r.address_text || 'Điểm sự cố';
+                    const upCount = r.confirm_count || 0;
+                    const downCount = r.reject_count || 0;
+
+                    let statusBadge = '<span style="background:rgba(16,185,129,0.2); color:#34d399; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700;">🟢 Đang hiển thị</span>';
+                    if (r.status === 'hidden') {
+                        statusBadge = '<span style="background:rgba(239,68,68,0.2); color:#f87171; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700;">⚪ Đã ẩn</span>';
+                    } else if (r.status === 'closed') {
+                        statusBadge = '<span style="background:rgba(148,163,184,0.2); color:#94a3b8; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700;">⚫ Đã kết thúc</span>';
+                    }
+
+                    html += `
+                        <div class="panel-card" style="padding:12px 14px; margin-bottom:2px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+                                <span style="font-size:0.78rem; font-weight:700; color:${isFlood ? '#60a5fa' : '#fb923c'};\>
+                                    ${isFlood ? '🌊 NGẬP NƯỚC' : '🚦 KẸT XE'}
+                                </span>
+                                ${statusBadge}
+                            </div>
+                            <h5 style="color:white; margin:0 0 6px 0; font-size:0.92rem; line-height:1.4;">${titleText}</h5>
+                            <p style="color:#a1a1aa; font-size:0.82rem; margin:0 0 8px 0;">${r.description || 'Không có mô tả chi tiết'}</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; border-top:1px dashed #3f3f46; padding-top:8px;">
+                                <span style="color:#94a3b8;">
+                                    👍 ${upCount} xác nhận &nbsp;|&nbsp; 👎 ${downCount} báo hết
+                                </span>
+                                <button type="button" onclick="focusMarker(${lat}, ${lng})" style="background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#60a5fa; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">
+                                    <i class="ph-bold ph-crosshair"></i> Xem vị trí
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                contentDiv.innerHTML = html;
+            } catch (err) {
+                contentDiv.innerHTML = `
+                    <div style="text-align:center; padding:30px 10px; color:#f87171;">
+                        <i class="ph-bold ph-warning-circle" style="font-size:2rem; margin-bottom:8px; display:block;"></i>
+                        <p>${err.message || 'Không thể tải lịch sử báo cáo!'}</p>
+                    </div>
+                `;
+            }
+        })();
+    }
+
+    // PANEL: HỒ SƠ CÁ NHÂN & ĐỔI MẬT KHẨU
+    else if (type === 'profile') {
+        contentDiv.innerHTML = `
+            <div style="text-align:center; padding:30px 10px; color:#a1a1aa;">
+                <div class="pulse-dot green" style="display:inline-block; margin-bottom:12px;"></div>
+                <p>Đang tải thông tin tài khoản...</p>
+            </div>
+        `;
+        (async () => {
+            try {
+                const user = await Api.me();
+                contentDiv.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <!-- Thẻ Tổng quan User -->
+                        <div class="panel-card" style="text-align:center; padding:18px 14px; background:linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.95)); border:1px solid #3b82f6;">
+                            <div style="width:56px; height:56px; background:linear-gradient(135deg, #2563eb, #3b82f6); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:white; font-size:1.8rem; margin-bottom:8px; box-shadow:0 4px 12px rgba(37,99,235,0.35);">
+                                <i class="ph-bold ph-user"></i>
+                            </div>
+                            <h4 style="color:white; margin:0 0 4px 0; font-size:1.1rem;">${user.full_name || user.username}</h4>
+                            <p style="color:#94a3b8; font-size:0.82rem; margin:0 0 10px 0;">@${user.username} &bull; ${user.email || 'Chưa liên kết email'}</p>
+                            <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fbbf24; padding:4px 12px; border-radius:20px; font-size:0.82rem; font-weight:700;">
+                                <i class="ph-bold ph-star"></i> Điểm uy tín: ${user.reputation_score ?? 10} điểm
+                            </div>
+                        </div>
+
+                        <!-- Form 1: Cập nhật thông tin -->
+                        <div class="panel-card">
+                            <h5 style="color:white; margin:0 0 12px 0; font-size:0.92rem; font-weight:700; display:flex; align-items:center; gap:6px;">
+                                <i class="ph-bold ph-identification-card" style="color:#60a5fa;"></i> Thông tin cá nhân
+                            </h5>
+                            <form onsubmit="handleUpdateProfileSubmit(event)" style="display:flex; flex-direction:column; gap:10px;">
+                                <div>
+                                    <label style="color:#a1a1aa; font-size:0.8rem; margin-bottom:4px; display:block;">Họ và tên:</label>
+                                    <input type="text" id="profileFullName" class="form-input" value="${user.full_name || ''}" placeholder="Nhập họ và tên..." required>
+                                </div>
+                                <div>
+                                    <label style="color:#a1a1aa; font-size:0.8rem; margin-bottom:4px; display:block;">Số điện thoại:</label>
+                                    <input type="tel" id="profilePhone" class="form-input" value="${user.phone || ''}" placeholder="Nhập số điện thoại...">
+                                </div>
+                                <button type="submit" id="btnUpdateProfile" style="background:#2563eb; color:white; border:none; padding:10px; border-radius:8px; font-weight:600; font-size:0.88rem; cursor:pointer; margin-top:4px;">
+                                    Lưu thông tin cá nhân
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Form 2: Đổi mật khẩu -->
+                        <div class="panel-card">
+                            <h5 style="color:white; margin:0 0 12px 0; font-size:0.92rem; font-weight:700; display:flex; align-items:center; gap:6px;">
+                                <i class="ph-bold ph-lock-key" style="color:#34d399;"></i> Đổi mật khẩu
+                            </h5>
+                            <form onsubmit="handleChangePasswordSubmit(event)" style="display:flex; flex-direction:column; gap:10px;">
+                                <div>
+                                    <label style="color:#a1a1aa; font-size:0.8rem; margin-bottom:4px; display:block;">Mật khẩu hiện tại:</label>
+                                    <input type="password" id="pwOld" class="form-input" placeholder="Mật khẩu hiện tại" required>
+                                </div>
+                                <div>
+                                    <label style="color:#a1a1aa; font-size:0.8rem; margin-bottom:4px; display:block;">Mật khẩu mới:</label>
+                                    <input type="password" id="pwNew" class="form-input" placeholder="Ít nhất 6 ký tự" minlength="6" required>
+                                </div>
+                                <div>
+                                    <label style="color:#a1a1aa; font-size:0.8rem; margin-bottom:4px; display:block;">Xác nhận mật khẩu mới:</label>
+                                    <input type="password" id="pwConfirm" class="form-input" placeholder="Nhập lại mật khẩu mới" minlength="6" required>
+                                </div>
+                                <button type="submit" id="btnChangePassword" style="background:#10b981; color:white; border:none; padding:10px; border-radius:8px; font-weight:600; font-size:0.88rem; cursor:pointer; margin-top:4px;">
+                                    Đổi mật khẩu
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                contentDiv.innerHTML = `
+                    <div style="text-align:center; padding:30px 10px; color:#f87171;">
+                        <i class="ph-bold ph-warning-circle" style="font-size:2rem; margin-bottom:8px; display:block;"></i>
+                        <p>${err.message || 'Không thể tải thông tin hồ sơ!'}</p>
+                    </div>
+                `;
+            }
+        })();
     }
 }
 
@@ -2021,27 +2155,97 @@ async function startGoogleAuthFromMap(mode = 'login') {
     }, 400);
 }
 
-async function handleAdminLoginFromMap(e) {
+// Cập nhật thông tin cá nhân
+async function handleUpdateProfileSubmit(e) {
     e.preventDefault();
-    const btn = document.getElementById('btnMapAdminSubmit');
-    const account = document.getElementById('mapAdminAccount').value.trim();
-    const password = document.getElementById('mapAdminPassword').value;
+    const btn = document.getElementById('btnUpdateProfile');
+    const fullName = document.getElementById('profileFullName').value.trim();
+    const phone = document.getElementById('profilePhone').value.trim();
 
-    if (btn) { btn.disabled = true; btn.innerText = 'Đang xác thực...'; }
+    if (btn) { btn.disabled = true; btn.innerText = 'Đang lưu...'; }
 
     try {
-        const res = await Api.login(account, password, true);
-        if (res && res.role === 'admin') {
-            showToast("Đăng nhập Quản trị viên thành công!", true);
-            setTimeout(() => {
-                window.location.href = 'index.php?route=admin_dashboard';
-            }, 600);
-        } else {
-            showToast("Tài khoản này không có quyền Quản trị viên!", false);
-            if (btn) { btn.disabled = false; btn.innerText = 'Đăng nhập Quản trị viên'; }
-        }
+        await Api.updateProfile({ full_name: fullName, phone: phone });
+        showToast('Cập nhật thông tin cá nhân thành công!', true);
+        if (btn) { btn.disabled = false; btn.innerText = 'Lưu thông tin cá nhân'; }
     } catch (err) {
-        showToast(err.message || "Đăng nhập Quản trị viên thất bại!", false);
-        if (btn) { btn.disabled = false; btn.innerText = 'Đăng nhập Quản trị viên'; }
+        showToast(err.message || 'Cập nhật thông tin thất bại!', false);
+        if (btn) { btn.disabled = false; btn.innerText = 'Lưu thông tin cá nhân'; }
+    }
+}
+
+// Đổi mật khẩu
+async function handleChangePasswordSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnChangePassword');
+    const oldPass = document.getElementById('pwOld').value;
+    const newPass = document.getElementById('pwNew').value;
+    const confirmPass = document.getElementById('pwConfirm').value;
+
+    if (newPass !== confirmPass) {
+        showToast('Mật khẩu xác nhận không khớp!', false);
+        return;
+    }
+
+    if (btn) { btn.disabled = true; btn.innerText = 'Đang đổi mật khẩu...'; }
+
+    try {
+        await Api.changePassword(oldPass, newPass, confirmPass);
+        showToast('Đổi mật khẩu thành công!', true);
+        document.getElementById('pwOld').value = '';
+        document.getElementById('pwNew').value = '';
+        document.getElementById('pwConfirm').value = '';
+        if (btn) { btn.disabled = false; btn.innerText = 'Đổi mật khẩu'; }
+    } catch (err) {
+        showToast(err.message || 'Đổi mật khẩu thất bại!', false);
+        if (btn) { btn.disabled = false; btn.innerText = 'Đổi mật khẩu'; }
+    }
+}
+
+// Tìm kiếm địa điểm trên bản đồ (OpenStreetMap Nominatim)
+let searchMarker = null;
+async function searchLocationOnMap() {
+    const input = document.getElementById('mapSearchInput');
+    if (!input) return;
+    const query = input.value.trim();
+    if (!query) {
+        showToast('Vui lòng nhập địa điểm hoặc tên đường cần tìm!', false);
+        return;
+    }
+    showToast('Đang tìm kiếm: ' + query + '...', true);
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=1`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+            const displayName = data[0].display_name;
+
+            if (searchMarker) {
+                map.removeLayer(searchMarker);
+            }
+
+            const searchIcon = L.divIcon({
+                className: 'custom-search-marker',
+                html: `<div style="background:#2563eb; color:white; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px rgba(37,99,235,0.8); border:2px solid white;"><i class="ph-bold ph-map-pin" style="font-size:1.1rem;"></i></div>`,
+                iconSize: [34, 34],
+                iconAnchor: [17, 34]
+            });
+
+            searchMarker = L.marker([lat, lon], { icon: searchIcon }).addTo(map);
+            searchMarker.bindPopup(`
+                <div style="font-family:'Plus Jakarta Sans',sans-serif; padding:4px;">
+                    <div style="font-weight:700; color:#2563eb; margin-bottom:4px;"><i class="ph-bold ph-magnifying-glass"></i> Địa điểm tìm kiếm</div>
+                    <div style="font-size:0.85rem; color:#292929; line-height:1.4;">${displayName}</div>
+                </div>
+            `).openPopup();
+
+            map.flyTo([lat, lon], 16, { animate: true, duration: 1.2 });
+            showToast('Đã định vị đến địa điểm!', true);
+        } else {
+            showToast('Không tìm thấy địa điểm phù hợp! Thử nhập chi tiết hơn.', false);
+        }
+    } catch (e) {
+        showToast('Lỗi kết nối khi tìm kiếm địa điểm!', false);
     }
 }

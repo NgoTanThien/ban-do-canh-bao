@@ -8,6 +8,10 @@ require_method('GET', 'POST');
 $ctrl = new ReportController($conn);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (!empty($_GET['my'])) {
+        $user = require_login();
+        respond($ctrl->myReports((int)$user['id']));
+    }
     respond($ctrl->list($_GET['type'] ?? 'all'));
 }
 

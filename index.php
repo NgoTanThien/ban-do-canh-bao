@@ -73,7 +73,7 @@ switch ($route) {
     // 5. ĐĂNG XUẤT (Xóa sạch session, token DB & cookie)
     case 'logout':
         (new AuthController($conn))->logout();
-        header('Location: index.php?route=home');
+        header('Location: index.php?route=login');
         exit;
 
     // 6. TRANG QUẢN TRỊ VIÊN (ADMIN DASHBOARD)

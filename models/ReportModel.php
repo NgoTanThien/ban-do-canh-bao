@@ -168,4 +168,43 @@ class ReportModel {
             throw $e;
         }
     }
+    // Lấy danh sách báo cáo của một người dùng cụ thể
+    public function getByUserId(int $userId): array {
+        $sql = "SELECT * FROM reports WHERE user_id = ? ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // Lấy tất cả báo cáo cho Quản trị viên (Admin)
+    public function getAllForAdmin(?string $status = null): array {
+        $sql = "SELECT r.*, COALESCE(u.username, 'Ẩn danh') AS username, COALESCE(u.email, '') AS user_email
+                FROM reports r
+                LEFT JOIN users u ON r.user_id = u.id";
+        if ($status !== null && $status !== 'all') {
+            $sql .= " WHERE r.status = ?";
+        }
+        $sql .= " ORDER BY r.created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        if ($status !== null && $status !== 'all') {
+            $stmt->bind_param("s", $status);
+        }
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // Cập nhật trạng thái sự cố (dang_dien_ra, da_ket_thuc, bi_an)
+    public function updateReportStatus(int $id, string $status): bool {
+        $stmt = $this->conn->prepare("UPDATE reports SET status = ? WHERE id = ?");
+        $stmt->bind_param("si", $status, $id);
+        return $stmt->execute();
+    }
+
+    // Xóa báo cáo khỏi CSDL
+    public function deleteReport(int $id): bool {
+        $stmt = $this->conn->prepare("DELETE FROM reports WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
 }

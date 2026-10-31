@@ -1,5 +1,3 @@
-<!-- KHUNG THANH ĐIỀU HƯỚNG BÊN TRÁI (Bản đồ luôn sáng rõ 100%, không bị lớp mờ che) -->
-
 <!-- KHUNG THANH ĐIỀU HƯỚNG BÊN TRÁI -->
 <div class="sidebar" id="sidebar">
     <!-- 1. Menu Chính của Sidebar -->
@@ -32,6 +30,16 @@
                 <span>Radar GPS</span>
                 <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 6px; border-radius: 10px; margin-left: auto; font-weight: 700;">Mới</span>
             </a>
+            <?php if (isset($_SESSION['user_id'])): ?>
+            <a href="#" class="menu-item" onclick="openSubPanel('Báo cáo của tôi', 'my_reports')">
+                <i class="ph-bold ph-clock-counter-clockwise" style="color: #60a5fa;"></i>
+                <span>Báo cáo của tôi</span>
+            </a>
+            <a href="#" class="menu-item" onclick="openSubPanel('Hồ sơ & Đổi mật khẩu', 'profile')">
+                <i class="ph-bold ph-user-gear" style="color: #34d399;"></i>
+                <span>Hồ sơ & Bảo mật</span>
+            </a>
+            <?php endif; ?>
         </div>
 
         <div class="sidebar-divider"></div>
@@ -61,13 +69,12 @@
                 </div>
                 
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                      <a href="index.php?route=admin_login" style="color: #94a3b8; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-                    <i class="ph-bold ph-shield-check" style="color: #3b82f6;"></i> Cổng Quản Trị Viên (Admin) &rarr;
-                </a>
-
+                    <a href="index.php?route=admin_dashboard" style="color: #60a5fa; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                        <i class="ph-bold ph-shield-check" style="color: #3b82f6;"></i> Bảng Quản Trị Viên (Admin) &rarr;
+                    </a>
                 <?php endif; ?>
                 
-                <!-- Nút Đăng xuất trỏ thẳng qua Router index.php?route=logout để xử lý mượt mà -->
+                <!-- Nút Đăng xuất trỏ thẳng qua Router index.php?route=logout để chuyển về trang login -->
                 <a href="index.php?route=logout" onclick="localStorage.removeItem('currentUser');" style="color: #ef4444; font-weight: 600; font-size: 0.95rem; text-decoration: none; cursor: pointer;">
                     <i class="ph-bold ph-sign-out" style="margin-right: 8px;"></i> Đăng xuất
                 </a>
@@ -101,7 +108,7 @@
             <button type="button" class="btn-close-sidebar" onclick="closeReportPanel()" title="Quay lại">
                 <i class="ph ph-caret-left"></i>
             </button>
-            <h3 style="color: white; font-size: 1.05rem; flex: 1;">Báo sự cố tại điểm nà</h3>
+            <h3 style="color: white; font-size: 1.05rem; flex: 1;">Báo sự cố tại điểm này</h3>
             <button type="button" class="btn-close-sidebar" onclick="closeReportPanel()" title="Đóng sidebar">
                 <i class="ph ph-x"></i>
             </button>

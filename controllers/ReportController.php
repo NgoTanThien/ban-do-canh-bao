@@ -82,6 +82,13 @@ class ReportController {
         return move_uploaded_file($f['tmp_name'], $dir . $name) ? 'public/images/reports/' . $name : false;
     }
 
+    public function myReports(int $userId): array {
+        $items = $this->model->getByUserId($userId);
+        return [
+            'ok' => true, 'message' => 'Lấy danh sách báo cáo của bạn thành công', 'data' => $items
+        ];
+    }
+
     private function fail(string $error, int $code): array {
         return ['ok' => false, 'error' => $error, 'code' => $code];
     }

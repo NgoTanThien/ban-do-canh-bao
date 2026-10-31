@@ -71,7 +71,34 @@ const Api = {
     addReport:         (formData)                   => apiRequest('reports.php', { method: 'POST', body: formData }),
     vote:              (id, voteType)               => apiRequest('vote.php', { method: 'POST', body: { report_id: id, vote_type: voteType } }),
 
+    // --- Quản lý cá nhân & Đổi mật khẩu ---
+    myReports:         ()                           => apiRequest('reports.php', { query: { my: 1 } }),
+    changePassword:    (oldPass, newPass, confirm)  => apiRequest('change_password.php', { method: 'POST', body: { old_password: oldPass, new_password: newPass, confirm_password: confirm } }),
+    updateProfile:     (data)                       => apiRequest('update_profile.php', { method: 'POST', body: data }),
+
     // --- Quản trị Admin ---
     adminUsers:        ()                           => apiRequest('admin/users.php'),
     adminUserStatus:   (userId, action)             => apiRequest('admin/user_status.php', { method: 'POST', body: { user_id: userId, action } }),
+    adminReports:      (status = 'all')             => apiRequest('admin/reports.php', { query: { status } }),
+    adminReportAction: (reportId, action)           => apiRequest('admin/reports.php', { method: 'POST', body: { report_id: reportId, action } }),
+    adminSos:          ()                           => apiRequest('admin/sos.php'),
+    adminSosAction:    (sosId, status)              => apiRequest('admin/sos.php', { method: 'POST', body: { id: sosId, status } }),
+
+    // --- Lộ trình đường đi (Routing OSRM) ---
+    routing: async (start, end) => {
+        try {
+            const startCoord = Array.isArray(start) ? `${start[1]},${start[0]}` : `${start.lng},${start.lat}`;
+            const endCoord = Array.isArray(end) ? `${end[1]},${end[0]}` : `${end.lng},${end.lat}`;
+            const url = `https://router.project-osrm.org/route/v1/driving/${startCoord};${endCoord}?overview=full&geometries=geojson`;
+            const res = await fetch(url);
+            return await res.json();
+        } catch (e) {
+            console.warn('Lỗi routing:', e);
+            return null;
+        }
+    }
 };
+
+// Đảm bảo Api sẵn sàng toàn cục
+window.Api = Api;
+window.apiRequest = apiRequest;

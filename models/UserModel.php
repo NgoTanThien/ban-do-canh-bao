@@ -337,4 +337,11 @@ class UserModel {
     }
 
     // =========================================================================
+
+    public function updateProfile(int $userId, ?string $fullName, ?string $phone): bool
+    {
+        $stmt = $this->conn->prepare("UPDATE users SET full_name = ?, phone = ? WHERE id = ?");
+        $stmt->bind_param("ssi", $fullName, $phone, $userId);
+        return $stmt->execute();
+    }
 }

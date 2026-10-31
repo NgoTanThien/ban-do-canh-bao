@@ -76,6 +76,9 @@ const Api = {
     changePassword:    (oldPass, newPass, confirm)  => apiRequest('change_password.php', { method: 'POST', body: { old_password: oldPass, new_password: newPass, confirm_password: confirm } }),
     updateProfile:     (data)                       => apiRequest('update_profile.php', { method: 'POST', body: data }),
 
+    // --- Cứu hộ SOS ---
+    sendSos:           (data)                       => apiRequest('sos.php', { method: 'POST', body: data }),
+
     // --- Quản trị Admin ---
     adminUsers:        ()                           => apiRequest('admin/users.php'),
     adminUserStatus:   (userId, action)             => apiRequest('admin/user_status.php', { method: 'POST', body: { user_id: userId, action } }),

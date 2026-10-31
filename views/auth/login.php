@@ -557,12 +557,14 @@ $isAdminRoute = (isset($_GET['route']) && $_GET['route'] === 'admin_login') || i
                 const res = await Api.googleLogin(payload);
                 showToast('Đăng nhập với Google thành công!', true);
                 setTimeout(() => {
-                    if (res && res.role === 'admin') {
+                    const user = (res && res.user) ? res.user : res;
+                    const role = (res && res.role) || (user && user.role) || 'user';
+                    if (role === 'admin') {
                         window.location.href = 'index.php?route=admin_dashboard';
                     } else {
                         window.location.href = 'index.php?route=home';
                     }
-                }, 600);
+                }, 500);
             } catch (err) {
                 showToast(err.message || 'Xác thực Google thất bại!', false);
             }
@@ -630,12 +632,14 @@ $isAdminRoute = (isset($_GET['route']) && $_GET['route'] === 'admin_login') || i
                 showToast('Đăng nhập Google thành công!', true);
                 closeGoogleModal();
                 setTimeout(() => {
-                    if (res && res.role === 'admin') {
+                    const user = (res && res.user) ? res.user : res;
+                    const role = (res && res.role) || (user && user.role) || 'user';
+                    if (role === 'admin') {
                         window.location.href = 'index.php?route=admin_dashboard';
                     } else {
                         window.location.href = 'index.php?route=home';
                     }
-                }, 600);
+                }, 500);
             } catch (err) {
                 showToast(err.message || 'Đăng nhập Google thất bại!', false);
                 btn.disabled = false;
@@ -658,12 +662,14 @@ $isAdminRoute = (isset($_GET['route']) && $_GET['route'] === 'admin_login') || i
                 const res = await Api.login(account, password, rememberMe);
                 showToast('Đăng nhập thành công!', true);
                 setTimeout(() => {
-                    if (res && res.role === 'admin') {
+                    const user = (res && res.user) ? res.user : res;
+                    const role = (res && res.role) || (user && user.role) || 'user';
+                    if (role === 'admin') {
                         window.location.href = 'index.php?route=admin_dashboard';
                     } else {
                         window.location.href = 'index.php?route=home';
                     }
-                }, 600);
+                }, 500);
             } catch (err) {
                 showToast(err.message || 'Đăng nhập thất bại!', false);
                 btn.disabled = false;

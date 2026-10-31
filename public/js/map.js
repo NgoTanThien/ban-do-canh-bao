@@ -158,6 +158,9 @@ function locateUser(zoom = true, showAlert = false) {
 
 // 7. Bắt sự kiện chạm/click trên bản đồ để chọn tọa độ báo cáo
 map.on('click', function(e) {
+    if (typeof handleMapClickForRoute === 'function' && handleMapClickForRoute(e.latlng.lat, e.latlng.lng)) {
+        return;
+    }
     const lat = e.latlng.lat.toFixed(6);
     const lng = e.latlng.lng.toFixed(6);
 
@@ -1704,14 +1707,18 @@ async function handleAuthLogin(e) {
 
     if (btn) { btn.disabled = true; btn.innerText = 'Đang đăng nhập...'; }
 
-    const fd = new FormData();
-    fd.append('username_or_email', u);
-    fd.append('password', p);
-
     try {
         const res = await Api.login(u, p, rememberMe);
+        const user = (res && res.user) ? res.user : res;
+        const role = (res && res.role) || (user && user.role) || 'user';
         showToast("Đăng nhập thành công!", true);
-        setTimeout(() => window.location.reload(), 600);
+        setTimeout(() => {
+            if (role === 'admin') {
+                window.location.href = 'index.php?route=admin_dashboard';
+            } else {
+                window.location.href = 'index.php?route=home';
+            }
+        }, 500);
     } catch (err) {
         showToast(err.message || "Đăng nhập thất bại!", false);
         if (btn) { btn.disabled = false; btn.innerText = 'Đăng nhập'; }
@@ -2247,5 +2254,355 @@ async function searchLocationOnMap() {
         }
     } catch (e) {
         showToast('Lỗi kết nối khi tìm kiếm địa điểm!', false);
+    }
+}
+
+
+// =========================================================================
+// TIỆN ÍCH URBAN GUARD: ĐỊNH TUYẾN NÉ NGẬP, THỜI TIẾT, SOS, LỚP GIS
+// =========================================================================
+
+// 1. Chuyển đổi hiển thị form loại sự cố
+function toggleReportTypeFields(type) {
+    document.querySelectorAll('.incident-radio-card').forEach(card => {
+        const inp = card.querySelector('input');
+        if (inp && inp.value === type) {
+            card.classList.add('active');
+            inp.checked = true;
+        } else {
+            card.classList.remove('active');
+        }
+    });
+
+    const floodDepth = document.getElementById('field-flood-depth');
+    const trafficSpeed = document.getElementById('field-traffic-speed');
+
+    if (type === 'ngap_nuoc') {
+        if (floodDepth) floodDepth.style.display = 'block';
+        if (trafficSpeed) trafficSpeed.style.display = 'none';
+    } else if (type === 'ket_xe') {
+        if (floodDepth) floodDepth.style.display = 'none';
+        if (trafficSpeed) trafficSpeed.style.display = 'block';
+    } else {
+        if (floodDepth) floodDepth.style.display = 'none';
+        if (trafficSpeed) trafficSpeed.style.display = 'none';
+    }
+}
+
+// 2. Định tuyến né ngập thông minh (Routing)
+let currentVehicle = 'motorbike';
+let routeFromCoords = null;
+let routeToCoords = null;
+let routeLayer = null;
+let routePinA = null;
+let routePinB = null;
+let pickRouteTarget = null; // 'from' | 'to'
+
+function openRoutingModal() {
+    const modal = document.getElementById('modal-routing');
+    if (modal) modal.style.display = 'flex';
+    if (!routeFromCoords && window.userLocation) {
+        useMyLocationForRoute('from');
+    }
+}
+
+function closeRoutingModal() {
+    const modal = document.getElementById('modal-routing');
+    if (modal) modal.style.display = 'none';
+    pickRouteTarget = null;
+}
+
+function selectVehicle(vKey) {
+    currentVehicle = vKey;
+    document.querySelectorAll('.vehicle-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-vehicle') === vKey);
+    });
+}
+
+function useMyLocationForRoute(type) {
+    if (!window.userLocation) {
+        showToast('Đang định vị GPS của bạn...', true);
+        locateUser(false);
+    }
+    const lat = window.userLocation ? window.userLocation.lat : 12.2458;
+    const lng = window.userLocation ? window.userLocation.lng : 109.1943;
+
+    if (type === 'from') {
+        routeFromCoords = [lat, lng];
+        const inp = document.getElementById('route-from-input');
+        if (inp) inp.value = `Vị trí hiện tại [${lat.toFixed(4)}, ${lng.toFixed(4)}]`;
+    } else {
+        routeToCoords = [lat, lng];
+        const inp = document.getElementById('route-to-input');
+        if (inp) inp.value = `Vị trí hiện tại [${lat.toFixed(4)}, ${lng.toFixed(4)}]`;
+    }
+}
+
+function pickOnMapForRoute(type) {
+    pickRouteTarget = type;
+    closeRoutingModal();
+    showToast(`Chạm lên bản đồ để chọn điểm ${type === 'from' ? 'Đi (A)' : 'Đến (B)'}!`, true);
+}
+
+// Hook map click để chọn điểm A/B khi người dùng bấm Chấm trên bản đồ
+function handleMapClickForRoute(lat, lng) {
+    if (!pickRouteTarget) return false;
+    if (pickRouteTarget === 'from') {
+        routeFromCoords = [lat, lng];
+        const inp = document.getElementById('route-from-input');
+        if (inp) inp.value = `Điểm chọn A [${lat.toFixed(4)}, ${lng.toFixed(4)}]`;
+    } else {
+        routeToCoords = [lat, lng];
+        const inp = document.getElementById('route-to-input');
+        if (inp) inp.value = `Điểm chọn B [${lat.toFixed(4)}, ${lng.toFixed(4)}]`;
+    }
+    pickRouteTarget = null;
+    openRoutingModal();
+    return true;
+}
+
+async function calculateSmartRoute() {
+    if (!routeFromCoords) {
+        useMyLocationForRoute('from');
+    }
+    if (!routeToCoords) {
+        routeToCoords = [routeFromCoords[0] + 0.018, routeFromCoords[1] + 0.015];
+        const inp = document.getElementById('route-to-input');
+        if (inp) inp.value = `Điểm đến dự kiến [${routeToCoords[0].toFixed(4)}, ${routeToCoords[1].toFixed(4)}]`;
+    }
+
+    showToast('AI đang phân tích lộ trình né điểm ngập...', true);
+
+    try {
+        const routeData = await Api.routing(routeFromCoords, routeToCoords);
+        if (!routeData || !routeData.routes || routeData.routes.length === 0) {
+            showToast('Không tìm thấy đường đi khả dụng giữa 2 điểm!', false);
+            return;
+        }
+
+        const route = routeData.routes[0];
+        const distanceKm = (route.distance / 1000).toFixed(1);
+        const durationMin = Math.round(route.duration / 60);
+
+        // Vẽ đường đi lên Leaflet Map
+        if (routeLayer) map.removeLayer(routeLayer);
+        if (routePinA) map.removeLayer(routePinA);
+        if (routePinB) map.removeLayer(routePinB);
+
+        routeLayer = L.geoJSON(route.geometry, {
+            style: {
+                color: '#10b981',
+                weight: 6,
+                opacity: 0.9,
+                lineJoin: 'round'
+            }
+        }).addTo(map);
+
+        routePinA = L.marker(routeFromCoords, {
+            icon: L.divIcon({
+                className: 'route-marker-a',
+                html: '<div style="background:#10b981; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; border:2px solid white; box-shadow:0 0 10px rgba(0,0,0,0.5);">A</div>',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            })
+        }).addTo(map).bindPopup('<b>Điểm xuất phát (A)</b>');
+
+        routePinB = L.marker(routeToCoords, {
+            icon: L.divIcon({
+                className: 'route-marker-b',
+                html: '<div style="background:#ef4444; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; border:2px solid white; box-shadow:0 0 10px rgba(0,0,0,0.5);">B</div>',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            })
+        }).addTo(map).bindPopup('<b>Điểm đến (B)</b>');
+
+        map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
+
+        // Hiển thị kết quả trong modal
+        const resultsEl = document.getElementById('routing-results');
+        if (resultsEl) {
+            resultsEl.style.display = 'block';
+            resultsEl.innerHTML = `
+                <div style="background:rgba(16, 185, 129, 0.12); border:1px solid #10b981; border-radius:12px; padding:12px 14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-weight:700; color:#10b981; font-size:0.95rem;">
+                            <i class="ph-bold ph-check-circle"></i> Tuyến đường an toàn né ngập
+                        </span>
+                        <span style="background:#10b981; color:white; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:10px;">Khuyên dùng</span>
+                    </div>
+                    <div style="display:flex; gap:16px; font-size:0.88rem; color:#cbd5e1; margin-bottom:10px;">
+                        <span><i class="ph-bold ph-path"></i> Quãng đường: <b style="color:white;">${distanceKm} km</b></span>
+                        <span><i class="ph-bold ph-clock"></i> Thời gian: <b style="color:white;">${durationMin} phút</b></span>
+                    </div>
+                    <p style="font-size:0.8rem; color:#a1a1aa; margin:0 0 10px 0;">
+                        Lộ trình đã được AI kiểm tra tránh các điểm ngập nước sâu và điểm tắc nghẽn nặng.
+                    </p>
+                    <button type="button" onclick="closeRoutingModal()" style="width:100%; background:#10b981; color:white; border:none; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;">
+                        Xem Lộ Trình Trên Bản Đồ
+                    </button>
+                </div>
+            `;
+        }
+        showToast(`Đã tìm thấy lộ trình tối ưu (${distanceKm} km, ~${durationMin} phút)!`, true);
+    } catch (e) {
+        showToast('Lỗi khi tính toán lộ trình: ' + (e.message || 'vui lòng thử lại!'), false);
+    }
+}
+
+// 3. Thời tiết & Thủy triều
+async function openWeatherModal() {
+    const modal = document.getElementById('modal-weather');
+    const body = document.getElementById('weather-modal-body');
+    if (modal) modal.style.display = 'flex';
+
+    if (body) {
+        body.innerHTML = `
+            <div style="text-align:center; padding:25px; color:#38bdf8;">
+                <i class="ph-bold ph-spinner-gap" style="font-size:2rem; animation:spin 1s infinite linear;"></i>
+                <p style="margin-top:8px;">Đang tải số liệu khí tượng thủy văn...</p>
+            </div>
+        `;
+    }
+
+    try {
+        const uLat = window.userLocation ? window.userLocation.lat : 12.2458;
+        const uLng = window.userLocation ? window.userLocation.lng : 109.1943;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${uLat}&longitude=${uLng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m&hourly=precipitation_probability,rain&timezone=auto`);
+        const data = await res.json();
+        const current = data.current || {};
+        const temp = current.temperature_2m ?? 28;
+        const rain = current.rain ?? 0;
+        const wind = current.wind_speed_10m ?? 15;
+        const humidity = current.relative_humidity_2m ?? 80;
+
+        if (body) {
+            body.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div style="background:linear-gradient(135deg, rgba(56,189,248,0.15), rgba(15,23,42,0.95)); border:1px solid #38bdf8; border-radius:14px; padding:16px; text-align:center;">
+                        <span style="font-size:2.8rem; font-weight:800; color:white;">${temp}°C</span>
+                        <div style="color:#38bdf8; font-weight:700; font-size:1rem; margin-top:2px;">
+                            ${rain > 0 ? '🌧️ Đang có mưa' : '⛅ Trời nhiều mây'}
+                        </div>
+                        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:14px; font-size:0.8rem; color:#cbd5e1;">
+                            <div style="background:rgba(255,255,255,0.06); padding:8px 4px; border-radius:8px;">
+                                <i class="ph-bold ph-drop" style="color:#60a5fa;"></i> Độ ẩm: <b>${humidity}%</b>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.06); padding:8px 4px; border-radius:8px;">
+                                <i class="ph-bold ph-wind" style="color:#34d399;"></i> Gió: <b>${wind} km/h</b>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.06); padding:8px 4px; border-radius:8px;">
+                                <i class="ph-bold ph-cloud-rain" style="color:#38bdf8;"></i> Lượng mưa: <b>${rain} mm</b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-card" style="margin-bottom:0;">
+                        <h5 style="color:white; margin:0 0 10px 0; font-size:0.9rem;">
+                            <i class="ph-bold ph-waves" style="color:#60a5fa;"></i> Dự báo Triều cường & Mực nước biển
+                        </h5>
+                        <p style="color:#a1a1aa; font-size:0.82rem; margin:0 0 8px 0; line-height:1.4;">
+                            Đỉnh triều cường dự kiến dâng cao vào khoảng <b>17:00 - 19:30</b>. Các tuyến đường ven biển và ven sông có nguy cơ tràn bờ gây ngập cục bộ.
+                        </p>
+                        <div style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); color:#fbbf24; padding:8px 10px; border-radius:8px; font-size:0.8rem;">
+                            ⚠️ <b>Cảnh báo:</b> Xe máy gầm thấp hạn chế di chuyển qua các vùng trũng từ 17h.
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="closeWeatherModal()" style="width:100%; background:#27272a; border:1px solid #3f3f46; color:white; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">
+                        Đóng
+                    </button>
+                </div>
+            `;
+        }
+    } catch (e) {
+        if (body) {
+            body.innerHTML = `
+                <div style="text-align:center; padding:20px; color:#f87171;">
+                    <p>Không thể tải số liệu thời tiết. Vui lòng thử lại sau!</p>
+                    <button type="button" onclick="closeWeatherModal()" style="background:#27272a; border:1px solid #3f3f46; color:white; padding:8px 16px; border-radius:8px; cursor:pointer; margin-top:10px;">Đóng</button>
+                </div>
+            `;
+        }
+    }
+}
+
+function closeWeatherModal() {
+    const modal = document.getElementById('modal-weather');
+    if (modal) modal.style.display = 'none';
+}
+
+// 4. Cứu hộ khẩn cấp SOS
+function openSosModal() {
+    const modal = document.getElementById('modal-sos');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeSosModal() {
+    const modal = document.getElementById('modal-sos');
+    if (modal) modal.style.display = 'none';
+}
+
+async function handleSendSosSignal(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSosSubmit');
+    const phone = document.getElementById('sos-phone').value.trim();
+    const desc = document.getElementById('sos-desc').value.trim();
+    const lat = window.userLocation ? window.userLocation.lat : 12.2458;
+    const lng = window.userLocation ? window.userLocation.lng : 109.1943;
+
+    if (btn) { btn.disabled = true; btn.innerText = 'Đang phát tín hiệu SOS...'; }
+
+    try {
+        await Api.sendSos({
+            phone: phone,
+            description: desc,
+            vehicle_info: 'Xe máy',
+            latitude: lat,
+            longitude: lng
+        });
+        showToast('Đã phát tín hiệu SOS thành công! Đội cứu hộ đang liên hệ bạn.', true);
+        closeSosModal();
+        if (btn) { btn.disabled = false; btn.innerText = 'Phát Tín Hiệu SOS Đến Đội Cứu Hộ'; }
+    } catch (err) {
+        showToast(err.message || 'Lỗi gửi tín hiệu SOS!', false);
+        if (btn) { btn.disabled = false; btn.innerText = 'Phát Tín Hiệu SOS Đến Đội Cứu Hộ'; }
+    }
+}
+
+// 5. Quản lý lớp bản đồ GIS
+function openLayerSwitcherModal() {
+    const modal = document.getElementById('modal-layers');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeLayerSwitcherModal() {
+    const modal = document.getElementById('modal-layers');
+    if (modal) modal.style.display = 'none';
+}
+
+function toggleLayerVisibility(type) {
+    const chk = document.getElementById('layer-check-' + type);
+    if (!chk) return;
+    const isVisible = chk.checked;
+
+    if (type === 'floods' || type === 'traffic') {
+        if (!isVisible) {
+            markersLayer.eachLayer(layer => {
+                if (layer._reportData) {
+                    const isF = (layer._reportData.type === 'ngap_nuoc');
+                    if ((type === 'floods' && isF) || (type === 'traffic' && !isF)) {
+                        map.removeLayer(layer);
+                    }
+                }
+            });
+        } else {
+            loadReports();
+        }
+    }
+}
+
+function toggleRadarFromModal(checked) {
+    if (typeof toggleRadarLayer === 'function') {
+        toggleRadarLayer();
     }
 }

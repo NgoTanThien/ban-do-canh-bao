@@ -34,7 +34,11 @@
     </script>
 
        <!-- API Client & JS Bản đồ -->
+     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="public/js/api.js"></script>
     <script src="public/js/map.js"></script>
+    <script src="public/js/radar-weather.js"></script>
+    <script src="public/js/sidebar-ui.js"></script>
+    <script src="public/js/auth-handlers.js"></script>
 </body>
 </html>

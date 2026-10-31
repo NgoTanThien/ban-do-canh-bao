@@ -43,3 +43,4 @@ if ($action === 'verify') {
 } else {
     json_error('Thao tác không hợp lệ', 400);
 }
+

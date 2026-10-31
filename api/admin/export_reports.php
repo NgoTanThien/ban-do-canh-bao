@@ -39,3 +39,4 @@ foreach ($reports as $r) {
 
 fclose($fp);
 exit;
+

@@ -27,3 +27,4 @@ $stmt->bind_param("si", $status, $id);
 $stmt->execute();
 
 json_success(null, 'Đã cập nhật trạng thái cứu hộ!');
+

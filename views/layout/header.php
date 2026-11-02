@@ -34,18 +34,25 @@ if (file_exists($googleConfigFile)) {
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 
-    <!-- Style CSS -->
-    <link rel="stylesheet" href="public/css/style.css">
+    <!-- Style CSS (Có tham số version động để chống lưu cache trình duyệt cũ) -->
+    <link rel="stylesheet" href="public/css/style.css?v=<?= file_exists(__DIR__ . '/../../public/css/style.css') ? filemtime(__DIR__ . '/../../public/css/style.css') : time() ?>">
     <!-- Firebase Auth Web SDK (Google Sign-In) -->
-    <script type="module" src="public/js/firebase-auth.js"></script>
+    <script type="module" src="public/js/firebase-auth.js?v=<?= time() ?>"></script>
 </head>
 <body>
 
-    <!-- Cụm nút mở Menu góc trên trái -->
-    <div class="top-left-actions">
+    <!-- Cụm nút mở Menu góc trên trái & Thanh tìm kiếm địa điểm trên bản đồ -->
+    <div class="top-left-actions" style="display: flex; align-items: center; gap: 8px;">
         <button class="btn-menu" onclick="toggleSidebar()" title="Mở danh mục menu">
             <i class="ph-bold ph-list"></i>
         </button>
+        <div class="map-search-container" style="display: flex; align-items: center; background: rgba(24, 24, 27, 0.9); backdrop-filter: blur(8px); border: 1px solid #3f3f46; border-radius: 9999px; padding: 4px 10px 4px 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.3); height: 40px;">
+            <i class="ph-bold ph-magnifying-glass" style="color: #94a3b8; font-size: 1rem; margin-right: 6px;"></i>
+            <input type="text" id="mapSearchInput" placeholder="Tìm đường, địa điểm..." style="background: transparent; border: none; outline: none; color: white; font-size: 0.85rem; width: 175px;" onkeydown="if(event.key==='Enter') searchLocationOnMap()">
+            <button type="button" onclick="searchLocationOnMap()" style="background: #2563eb; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" title="Tìm kiếm trên bản đồ">
+                <i class="ph-bold ph-arrow-right" style="font-size: 0.85rem;"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Thanh thông báo trạng thái & Bộ lọc ở giữa trên -->
@@ -55,15 +62,12 @@ if (file_exists($googleConfigFile)) {
             <span id="status-text">Đang tải trạng thái...</span>
         </div>
         
-        <!--  THÊM KHỐI NÀY: Hiển thị nhiệt độ & icon thời tiết thời gian thực -->
+        <!-- Hiển thị nhiệt độ & icon thời tiết thời gian thực -->
         <div class="weather-pill" id="weather-pill" title="Thời tiết hiện tại">
             <span id="weather-icon"><i class="ph-bold ph-cloud-sun"></i></span>
             <span id="weather-temp">--°C</span>
         </div>
 
-       
-            
-        
         <div class="filter-pill" onclick="toggleFilterMenu(event)">
             <span id="currentFilterText">Tất cả sự cố</span>
             <i class="ph-bold ph-caret-down"></i>

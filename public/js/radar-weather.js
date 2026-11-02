@@ -3,7 +3,7 @@
 // ==========================================================================
 
 let userCircle = null; // Vòng tròn bán kính an toàn quanh người dùng
-let alertRadius = parseInt(localStorage.getItem('alertRadius')) || 1500; // Mặc định 1.5km
+const alertRadius = 500;
 let enableProximityAlert = localStorage.getItem('enableProximityAlert') !== 'false';
 let notifiedReportIds = new Set();
 let closestAlertPos = null;
@@ -168,18 +168,6 @@ async function requestNotificationPermission() {
     } else {
         showToast("Bạn đã từ chối quyền thông báo.", false);
     }
-}
-
-// Thay đổi bán kính cảnh báo (500m, 1000m, 1500m, 2000m)
-function changeAlertRadius(radiusMeters) {
-    alertRadius = parseInt(radiusMeters);
-    localStorage.setItem('alertRadius', alertRadius);
-    if (window.userLocation) {
-        updateUserRadiusCircle(window.userLocation.lat, window.userLocation.lng);
-        checkProximityAlerts();
-    }
-    openSubPanel('Theo dõi khu vực', 'follow');
-    showToast(`Đã đổi bán kính cảnh báo sang ${alertRadius < 1000 ? alertRadius + 'm' : (alertRadius/1000) + 'km'}!`, true);
 }
 
 // Bật / Tắt tính năng cảnh báo lân cận

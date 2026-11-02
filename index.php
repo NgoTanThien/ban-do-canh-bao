@@ -7,21 +7,31 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (!empty($_GET['logged_out']) || !empty($_GET['_t']) || !empty($_GET['logout'])) {
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Pragma: no-cache");
+}
+
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/config/auth.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 
-// Khôi phục phiên tự động nếu có cookie Remember Me 30 ngày hợp lệ
-restore_remember_me_session();
-
 // Lấy tham số điều hướng trên URL (mặc định là 'home' - Trang bản đồ)
 $route = $_GET['route'] ?? 'home';
+
+// Khôi phục phiên tự động nếu có cookie Remember Me 30 ngày hợp lệ (trừ khi đang yêu cầu đăng xuất)
+if ($route !== 'logout') {
+    restore_remember_me_session();
+}
 
 switch ($route) {
     // 1. ĐĂNG XUẤT (Xóa sạch session, token DB & cookie)
     case 'logout':
         (new AuthController($conn))->logout();
-        header('Location: index.php?route=home');
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Cache-Control: post-check=0, pre-check=0", false);
+        header("Pragma: no-cache");
+        header('Location: index.php?route=home&logged_out=1&_t=' . time());
         exit;
 
     // 2. TRANG QUẢN TRỊ VIÊN (ADMIN DASHBOARD)

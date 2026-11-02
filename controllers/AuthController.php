@@ -504,20 +504,35 @@ class AuthController {
      */
     public function logout(): array
     {
+        $currentUid = !empty($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+        if ($currentUid > 0) {
+            $this->users->deleteTokensByUserId($currentUid, 'remember_me');
+        }
+
         if (!empty($_COOKIE['remember_me'])) {
             $parts = explode(':', $_COOKIE['remember_me'], 2);
             if (count($parts) === 2) {
                 $rawToken = $parts[1];
                 $this->users->deleteUserToken($rawToken, 'remember_me');
             }
-            @setcookie('remember_me', '', time() - 3600, '/');
-            unset($_COOKIE['remember_me']);
         }
 
+        // Xóa cookie remember_me trên mọi chuẩn trình duyệt
+        @setcookie('remember_me', '', time() - 3600, '/');
+        @setcookie('remember_me', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+        unset($_COOKIE['remember_me']);
+
+        // Xóa sạch session
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $p = session_get_cookie_params();
             @setcookie(session_name(), '', time() - 3600, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+            @setcookie(session_name(), '', time() - 3600, '/');
         }
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_destroy();
@@ -562,6 +577,44 @@ class AuthController {
         }
 
         return ['ok' => true, 'data' => ['logged_in' => true, 'user' => $this->publicUser($user)]];
+    }
+
+    public function changePassword(int $userId, array $in): array
+    {
+        $oldPass = (string)($in['old_password'] ?? '');
+        $newPass = (string)($in['new_password'] ?? '');
+        $confirm = (string)($in['confirm_password'] ?? $in['password_confirmation'] ?? '');
+
+        if ($oldPass === '' || $newPass === '') {
+            return $this->fail('Vui lòng nhập mật khẩu cũ và mật khẩu mới!', 422);
+        }
+        if (mb_strlen($newPass) < 6) {
+            return $this->fail('Mật khẩu mới phải có tối thiểu 6 ký tự!', 422);
+        }
+        if ($confirm !== '' && $newPass !== $confirm) {
+            return $this->fail('Xác nhận mật khẩu mới không khớp!', 422);
+        }
+
+        $stmt = $this->conn->prepare("SELECT password FROM users WHERE id = ? LIMIT 1");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+        if (!$user || !password_verify($oldPass, $user['password'])) {
+            return $this->fail('Mật khẩu hiện tại không chính xác!', 400);
+        }
+
+        $this->users->updatePassword($userId, $newPass);
+
+        return ['ok' => true, 'message' => 'Đổi mật khẩu thành công!', 'data' => null];
+    }
+
+    public function updateProfile(int $userId, array $in): array
+    {
+        $fullName = trim($in['full_name'] ?? '');
+        $phone    = trim($in['phone'] ?? '');
+        $this->users->updateProfile($userId, $fullName, $phone);
+        $user = $this->users->findById($userId);
+        return ['ok' => true, 'message' => 'Cập nhật thông tin thành công!', 'data' => $this->publicUser($user)];
     }
 
     private function publicUser(array $u): array

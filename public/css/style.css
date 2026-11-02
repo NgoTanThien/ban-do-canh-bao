@@ -350,6 +350,9 @@ body, html {
     top: 0;
     left: 0;
     bottom: 0;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
     width: 360px;
     max-width: 88vw;
     background: var(--sidebar-bg);
@@ -359,6 +362,33 @@ body, html {
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: #3f3f46 transparent;
+}
+
+.sidebar-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-body::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    border-radius: 4px;
+}
+
+.sidebar-body::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
 }
 
 .sidebar.open {
@@ -426,21 +456,21 @@ body, html {
 }
 
 .sidebar-menu {
-    padding: 16px 14px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 .menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 12px;
+    gap: 10px;
+    padding: 9px 14px;
+    border-radius: 10px;
     color: #d4d4d8;
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     font-weight: 500;
     transition: background 0.15s ease, color 0.15s ease;
 }
@@ -493,8 +523,10 @@ body, html {
 
 .sidebar-footer {
     margin-top: auto;
-    padding: 20px;
+    flex-shrink: 0;
+    padding: 14px 16px;
     border-top: 1px solid #27272a;
+    background: #18181b;
 }
 
 /* Sub-panel content */
@@ -864,4 +896,521 @@ path[stroke="#0284c7"] {
 
 .f8-btn-back:hover {
     color: #111111;
+}
+
+
+/* =========================================================================
+   STYLE CHO BÁO CÁO SỰ CỐ & CÁC MODAL TIỆN ÍCH (ROUTING, SOS, WEATHER, GIS)
+   ========================================================================= */
+
+/* 1. Nhãn & Thẻ trong Khung Báo Cáo Sự Cố */
+.report-form-label {
+    color: #ffffff !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.step-num {
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* 2. Chọn loại sự cố (Bước 1) */
+.incident-type-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.incident-radio-card {
+    background: #27272a;
+    border: 1.5px solid #3f3f46;
+    border-radius: 10px;
+    padding: 10px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ffffff !important;
+    text-align: center;
+}
+
+.incident-radio-card input {
+    display: none;
+}
+
+.incident-radio-card:hover {
+    border-color: #60a5fa;
+    background: #323238;
+}
+
+.incident-radio-card.active,
+.incident-radio-card:has(input:checked) {
+    border-color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.18) !important;
+    color: #38bdf8 !important;
+}
+
+/* 3. Chọn mức độ trực quan (Bước 2) */
+.visual-level-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.visual-level-card {
+    background: #27272a;
+    border: 1.5px solid #3f3f46;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #ffffff !important;
+}
+
+.visual-level-card input {
+    display: none;
+}
+
+.visual-level-card:hover {
+    border-color: #60a5fa;
+    background: #323238;
+}
+
+.visual-level-card.active,
+.visual-level-card:has(input:checked) {
+    border-color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.18) !important;
+}
+
+.depth-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+.depth-tag.yellow {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.depth-tag.orange {
+    background: rgba(249, 115, 22, 0.2);
+    color: #fb923c;
+    border: 1px solid rgba(249, 115, 22, 0.4);
+}
+
+.depth-tag.red {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* 4. Nút bấm huỷ & gửi báo cáo */
+.btn-cancel {
+    flex: 1;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    padding: 12px;
+    color: #ffffff !important;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+    text-align: center;
+}
+
+.btn-cancel:hover {
+    background: #3f3f46;
+}
+
+.btn-submit-report {
+    flex: 2;
+    background: #2563eb;
+    border: none;
+    padding: 12px;
+    color: #ffffff !important;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s;
+}
+
+.btn-submit-report:hover {
+    background: #1d4ed8;
+}
+
+/* 5. Khung Modal Tiện Ích Đô Thị */
+.app-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal-card {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    color: #ffffff;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #27272a;
+}
+
+.modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.modal-title h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #ffffff;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.6rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+}
+
+.btn-close-modal:hover {
+    color: #ffffff;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+}
+
+/* 6. Tabs chọn phương tiện (Vehicle Tabs) */
+.vehicle-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.vehicle-tab {
+    background: #27272a;
+    border: 1.5px solid #3f3f46;
+    border-radius: 10px;
+    padding: 10px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.vehicle-tab:hover {
+    border-color: #60a5fa;
+    color: #ffffff;
+}
+
+.vehicle-tab.active {
+    background: rgba(16, 185, 129, 0.18) !important;
+    border-color: #10b981 !important;
+    color: #10b981 !important;
+}
+
+.route-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.route-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 10px;
+    padding: 6px 10px;
+}
+
+.route-pin-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: #ffffff;
+}
+
+.route-pin-icon.green { background: #10b981; }
+.route-pin-icon.red { background: #ef4444; }
+
+.route-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 0.88rem;
+}
+
+.btn-route-action {
+    background: #3f3f46;
+    border: none;
+    color: #e4e4e7;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-route-action:hover {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-primary-block {
+    width: 100%;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s;
+}
+
+.btn-primary-block:hover {
+    background: #1d4ed8;
+}
+
+/* 7. SOS Hotline & Cứu Hộ */
+.sos-alert-box {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    color: #ffffff;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+.hotline-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.hotline-card {
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-decoration: none;
+    color: #ffffff;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: border-color 0.15s;
+}
+
+.hotline-card:hover {
+    border-color: #ef4444;
+}
+
+.hotline-card strong {
+    font-size: 1rem;
+    color: #f87171;
+}
+
+.hotline-card span {
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+.btn-danger-block {
+    width: 100%;
+    background: #ef4444;
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s;
+}
+
+.btn-danger-block:hover {
+    background: #dc2626;
+}
+
+/* 8. Quản Lý Lớp Bản Đồ GIS */
+.layer-toggle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.layer-toggle-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.layer-toggle-item:hover {
+    border-color: #60a5fa;
+}
+
+.layer-toggle-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #2563eb;
+    cursor: pointer;
+}
+
+.layer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.layer-title {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.layer-desc {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* 9. Badge Pills trong Menu Sidebar */
+.badge-pill {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: auto;
+}
+
+.badge-pill.green { background: #10b981; color: #ffffff; }
+.badge-pill.blue { background: #0284c7; color: #ffffff; }
+.badge-pill.red { background: #ef4444; color: #ffffff; }
+
+.badge-admin {
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.badge-trusted {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
 }

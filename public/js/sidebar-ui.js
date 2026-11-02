@@ -783,6 +783,7 @@ function openSubPanel(title, type, extraData = {}) {
     else if (type === 'follow') {
         const hasNotif = ("Notification" in window);
         const notifGranted = hasNotif && (Notification.permission === "granted");
+        const fixedRadiusLabel = alertRadius < 500 ? `${alertRadius}m` : `${alertRadius / 1000}km`;
 
         let nearbyList = [];
         if (window.userLocation && Array.isArray(window.currentReports)) {
@@ -797,15 +798,6 @@ function openSubPanel(title, type, extraData = {}) {
             });
             nearbyList.sort((a, b) => a.distance - b.distance);
         }
-
-        const radiusOptions = [500, 1000, 1500, 2000];
-        const radiusButtons = radiusOptions.map(r => {
-            const isActive = (alertRadius === r);
-            const label = r < 1000 ? `${r}m` : `${r/1000}km`;
-            const bg = isActive ? '#2563eb' : '#27272a';
-            const border = isActive ? '#60a5fa' : '#3f3f46';
-            return `<button type="button" onclick="changeAlertRadius(${r})" style="flex:1; background:${bg}; color:white; border:1px solid ${border}; padding:8px 4px; border-radius:8px; font-weight:600; font-size:0.85rem; cursor:pointer;">${label}</button>`;
-        }).join('');
 
         let listHtml = '';
         if (nearbyList.length === 0) {
@@ -868,10 +860,9 @@ function openSubPanel(title, type, extraData = {}) {
                         </label>
                     </div>
 
-                    <p style="color:#a1a1aa; font-size:0.8rem; margin-bottom:8px;">Chọn cự ly quét an toàn:</p>
-                    <div style="display:flex; gap:8px;">
-                        ${radiusButtons}
-                    </div>
+                    <p style="color:#a1a1aa; font-size:0.82rem; margin:0;">
+                        Bán kính quét an toàn cố định: <strong style="color:#38bdf8;">${fixedRadiusLabel}</strong>
+                    </p>
                 </div>
 
                 <div>

@@ -107,6 +107,9 @@ function locateUser(zoom = true, showAlert = false) {
 
 // 5. Bắt sự kiện chạm/click trên bản đồ để chọn tọa độ báo cáo
 map.on('click', function(e) {
+    if (typeof handleMapClickForRoute === 'function' && handleMapClickForRoute(e.latlng.lat, e.latlng.lng)) {
+        return;
+    }
     const lat = e.latlng.lat.toFixed(6);
     const lng = e.latlng.lng.toFixed(6);
 
@@ -193,14 +196,34 @@ function renderMarkers(reports) {
     }
 
     filteredReports.forEach(r => {
-        const isFlood = (r.type === 'ngap_nuoc' || r.report_type === 'flood');
-        const pulseClass = isFlood ? 'pulse-marker-flood' : 'pulse-marker-traffic';
+        const type = r.type || r.report_type || 'ngap_nuoc';
+        let emoji = '🌊';
+        let pulseClass = 'pulse-marker-flood';
+        let typeBadge = '<span style="background: rgba(2, 132, 199, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🌊 NGẬP NƯỚC</span>';
+
+        if (type === 'ket_xe' || type === 'traffic') {
+            emoji = '🚗';
+            pulseClass = 'pulse-marker-traffic';
+            typeBadge = '<span style="background: rgba(249, 115, 22, 0.2); color: #fb923c; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🚗 KẸT XE</span>';
+        } else if (type === 'cay_do') {
+            emoji = '🌳';
+            pulseClass = 'pulse-marker-flood';
+            typeBadge = '<span style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🌳 CÂY ĐỔ</span>';
+        } else if (type === 'tai_nan') {
+            emoji = '🛑';
+            pulseClass = 'pulse-marker-traffic';
+            typeBadge = '<span style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🛑 TAI NẠN</span>';
+        } else if (type === 'rao_chan') {
+            emoji = '🚧';
+            pulseClass = 'pulse-marker-flood';
+            typeBadge = '<span style="background: rgba(234, 179, 8, 0.2); color: #eab308; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🚧 RÀO CHẮN</span>';
+        }
 
         const customIcon = L.divIcon({
             className: pulseClass,
-            iconSize: [26, 26],
-            iconAnchor: [13, 13],
-            html: `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:12px; line-height:1;">${isFlood ? '🌊' : '🚦'}</div>`
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            html: `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:14px; line-height:1;">${emoji}</div>`
         });
 
         const lat = parseFloat(r.latitude);
@@ -209,11 +232,6 @@ function renderMarkers(reports) {
 
         const marker = L.marker([lat, lng], { icon: customIcon });
 
-        // Tên hiển thị loại và tiêu đề
-        const typeBadge = isFlood
-            ? `<span style="background: rgba(2, 132, 199, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🌊 NGẬP NƯỚC</span>`
-            : `<span style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🚦 KẸT XE</span>`;
-
         const titleText = r.address_text || r.title || 'Điểm sự cố';
         const descText = r.description || 'Không có mô tả chi tiết.';
         const upCount = r.confirm_count || r.upvotes || 0;
@@ -221,19 +239,36 @@ function renderMarkers(reports) {
         const timeText = r.created_at || 'Vừa xong';
         const reporter = r.username ? `Người báo: <b>${r.username}</b>` : '';
 
+        let extraMetric = '';
+        if (r.water_depth_cm && parseInt(r.water_depth_cm) > 0) {
+            extraMetric += `<span style="background:rgba(56,189,248,0.18); color:#38bdf8; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">💧 Ngập: ${r.water_depth_cm}cm</span> `;
+        }
+        if (r.speed_kmh && parseFloat(r.speed_kmh) > 0) {
+            extraMetric += `<span style="background:rgba(251,146,60,0.18); color:#fb923c; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">⚡ ${r.speed_kmh} km/h</span> `;
+        }
+
+        let imgHtml = '';
+        if (r.image_url && r.image_url !== '0' && r.image_url !== '') {
+            imgHtml = `<div style="margin:6px 0;"><img src="${r.image_url}" alt="Ảnh hiện trường" style="width:100%; max-height:140px; object-fit:cover; border-radius:8px; border:1px solid #3f3f46;"></div>`;
+        }
+
         const popupHtml = `
-            <div style="font-size: 0.9rem; line-height: 1.5; min-width: 200px;">
-                <div style="margin-bottom: 6px;">${typeBadge}</div>
+            <div style="font-size: 0.9rem; line-height: 1.5; min-width: 220px; max-width: 280px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                    ${typeBadge}
+                    ${extraMetric}
+                </div>
                 <b style="color: white; font-size: 0.98rem; display: block; margin-bottom: 4px;">${titleText}</b>
-                <p style="margin: 4px 0 8px 0; color: #a1a1aa; font-size: 0.85rem;">${descText}</p>
-                <div style="font-size: 0.75rem; color: #71717a; margin-bottom: 8px;">
+                ${imgHtml}
+                <p style="margin: 4px 0 8px 0; color: #cbd5e1; font-size: 0.85rem;">${descText}</p>
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">
                     ${reporter ? reporter + ' • ' : ''}${timeText}
                 </div>
                 <div style="display: flex; gap: 8px; border-top: 1px solid #3f3f46; padding-top: 8px;">
-                    <button onclick="voteReport(${r.id}, 'confirm')" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid #3f3f46; background: #27272a; color: #34d399; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    <button onclick="voteReport(${r.id}, 'confirm')" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid #3f3f46; background: #27272a; color: #34d399; font-weight:700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
                         👍 Đúng (${upCount})
                     </button>
-                    <button onclick="voteReport(${r.id}, 'reject')" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid #3f3f46; background: #27272a; color: #f87171; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    <button onclick="voteReport(${r.id}, 'reject')" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid #3f3f46; background: #27272a; color: #f87171; font-weight:700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
                         👎 Đã hết (${downCount})
                     </button>
                 </div>

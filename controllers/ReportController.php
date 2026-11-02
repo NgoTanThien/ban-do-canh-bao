@@ -4,7 +4,7 @@
 require_once __DIR__ . '/../models/ReportModel.php';
 
 class ReportController {
-    const TYPES      = ['ngap_nuoc', 'ket_xe'];
+    const TYPES      = ['ngap_nuoc', 'ket_xe', 'cay_do', 'tai_nan', 'rao_chan'];
     const SEVERITIES = ['nhe', 'vua', 'nghiem_trong'];
     const VOTES      = ['confirm', 'reject'];
     const MAX_IMAGE_BYTES = 5242880; // 5MB
@@ -23,6 +23,11 @@ class ReportController {
         return ['ok' => true, 'data' => $reports];
     }
 
+    public function myReports(int $userId): array {
+        $reports = $this->model->getByUserId($userId);
+        return ['ok' => true, 'data' => $reports];
+    }
+
     public function create(int $userId, array $in, array $files): array {
         $type     = $in['type'] ?? '';
         $severity = $in['severity'] ?? 'vua';
@@ -30,6 +35,17 @@ class ReportController {
         $lng      = (float)($in['longitude'] ?? 0);
         $address  = trim($in['address_text'] ?? '');
         $desc     = trim($in['description'] ?? '');
+
+        // Tính toán mức độ từ trực quan nếu có
+        if (!empty($in['water_level_visual'])) {
+            if ($in['water_level_visual'] === 'mat_ca') $severity = 'nhe';
+            elseif ($in['water_level_visual'] === 'banh_xe') $severity = 'vua';
+            elseif ($in['water_level_visual'] === 'yen_xe') $severity = 'nghiem_trong';
+        } elseif (!empty($in['traffic_speed_visual'])) {
+            if ($in['traffic_speed_visual'] === 'cham') $severity = 'nhe';
+            elseif ($in['traffic_speed_visual'] === 'un_u') $severity = 'vua';
+            elseif ($in['traffic_speed_visual'] === 'tac_nghen') $severity = 'nghiem_trong';
+        }
 
         if (!in_array($type, self::TYPES, true))         return $this->fail('Loại sự cố không hợp lệ', 422);
         if (!in_array($severity, self::SEVERITIES, true)) return $this->fail('Mức độ nghiêm trọng không hợp lệ', 422);
@@ -63,26 +79,29 @@ class ReportController {
         $result = $this->model->vote($reportId, $userId, $voteType);
         if ($result['ok']) {
             $result['message'] = 'Đã ghi nhận bình chọn của bạn';
+            return $result;
         }
-        return $result;
+        return $this->fail($result['message'] ?? 'Bình chọn thất bại', 400);
     }
 
-    // Trả đường dẫn tương đối nếu lưu thành công, false nếu ảnh không hợp lệ
-    private function saveImage(array $f) {
-        if ($f['error'] !== UPLOAD_ERR_OK || $f['size'] > self::MAX_IMAGE_BYTES) return false;
+    private function saveImage(array $file) {
+        if ($file['size'] > self::MAX_IMAGE_BYTES) return false;
+        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        if (!isset($allowed[$mime])) return false;
 
-        $info = @getimagesize($f['tmp_name']); // xác minh đúng là ảnh thật
-        $map  = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif', IMAGETYPE_WEBP => 'webp'];
-        if (!$info || !isset($map[$info[2]])) return false;
+        $dir = __DIR__ . '/../public/images/reports';
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
 
-        $dir = __DIR__ . '/../public/images/reports/';
-        if (!is_dir($dir) && !mkdir($dir, 0755, true)) return false;
-
-        $name = time() . '_' . uniqid() . '.' . $map[$info[2]];
-        return move_uploaded_file($f['tmp_name'], $dir . $name) ? 'public/images/reports/' . $name : false;
+        $ext = $allowed[$mime];
+        $filename = time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
+        $dest = $dir . '/' . $filename;
+        if (!move_uploaded_file($file['tmp_name'], $dest)) return false;
+        return 'public/images/reports/' . $filename;
     }
 
-    private function fail(string $error, int $code): array {
-        return ['ok' => false, 'error' => $error, 'code' => $code];
+    private function fail(string $msg, int $code = 400): array {
+        return ['ok' => false, 'message' => $msg, 'code' => $code];
     }
 }

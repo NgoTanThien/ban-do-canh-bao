@@ -61,7 +61,7 @@
                 </div>
                 
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                      <a href="index.php?route=admin_login" style="color: #94a3b8; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                      <a href="index.php?route=admin_dashboard" style="color: #94a3b8; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
                     <i class="ph-bold ph-shield-check" style="color: #3b82f6;"></i> Cổng Quản Trị Viên (Admin) &rarr;
                 </a>
 

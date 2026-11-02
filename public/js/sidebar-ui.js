@@ -416,7 +416,7 @@ function openSubPanel(title, type, extraData = {}) {
                 <h2 style="font-size:24px; font-weight:700; color:#292929; margin-top:16px; margin-bottom:8px;">Đăng nhập</h2>
             
 
-                <!-- Danh sách nút chọn phương thức: Google + Email/SĐT -->
+                <!-- Danh sách nút chọn phương thức: Google + Email -->
                 <div id="loginMethodsList" style="display:flex; flex-direction:column; gap:12px;">
                     <button type="button" class="f8-pill-btn" onclick="startGoogleAuthFromMap('login')">
                         <span class="f8-pill-icon">
@@ -437,7 +437,7 @@ function openSubPanel(title, type, extraData = {}) {
                                 <circle cx="12" cy="7" r="4"/>
                             </svg>
                         </span>
-                        <span class="f8-pill-text" style="color:#111111;">Sử dụng email / số điện thoại</span>
+                        <span class="f8-pill-text" style="color:#111111;">Sử dụng Tên đăng nhập/ Email</span>
                     </button>
                 </div>
 
@@ -453,7 +453,7 @@ function openSubPanel(title, type, extraData = {}) {
                     <form onsubmit="handleAuthLogin(event)" style="display:flex; flex-direction:column; gap:12px;">
                         <div>
                             <label style="font-size:13px; font-weight:700; color:#292929; margin-bottom:4px; display:block;">Tên đăng nhập hoặc Email</label>
-                            <input type="text" id="loginUsername" placeholder="Email hoặc Số điện thoại" class="f8-form-input" required autocomplete="username">
+                            <input type="text" id="loginUsername" placeholder="Nhập Email hoặc tên đăng nhập" class="f8-form-input" required autocomplete="username">
                         </div>
                         <div>
                             <label style="font-size:13px; font-weight:700; color:#292929; margin-bottom:4px; display:block;">Mật khẩu</label>
@@ -474,36 +474,6 @@ function openSubPanel(title, type, extraData = {}) {
                     </form>
                 </div>
 
-                <!-- Form đăng nhập Admin khi bấm Cổng Quản trị viên -->
-                <div id="adminLoginSectionMap" style="display:none; text-align:left;">
-                    <button type="button" class="f8-btn-back" onclick="document.getElementById('adminLoginSectionMap').style.display='none'; document.getElementById('loginMethodsList').style.display='flex';">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                        Quay lại Đăng nhập người dùng
-                    </button>
-
-                    <div style="text-align:center; margin-bottom:14px;">
-                        <span style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:9999px;">
-                            🛡️ CỔNG QUẢN TRỊ VIÊN (ADMIN)
-                        </span>
-                    </div>
-
-                    <form onsubmit="handleAdminLoginFromMap(event)" style="display:flex; flex-direction:column; gap:12px;">
-                        <div>
-                            <label style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:4px; display:block;">Tài khoản Admin</label>
-                            <input type="text" id="mapAdminAccount" value="admin_super" class="f8-form-input" required autocomplete="username">
-                        </div>
-                        <div>
-                            <label style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:4px; display:block;">Mật khẩu Admin</label>
-                            <input type="password" id="mapAdminPassword" placeholder="Nhập mật khẩu" class="f8-form-input" required autocomplete="current-password">
-                        </div>
-
-                        <button type="submit" id="btnMapAdminSubmit" class="f8-submit-btn" style="background:linear-gradient(135deg, #0f172a, #1e293b);">
-                            Đăng nhập Quản trị viên
-                        </button>
-                    </form>
-                </div>
 
                 <!-- Liên kết điều hướng bên dưới -->
                 <div style="margin-top:24px; text-align:center; font-size:13.5px; color:#35414c;">
@@ -514,17 +484,10 @@ function openSubPanel(title, type, extraData = {}) {
                         <a href="#" onclick="openSubPanel('Quên mật khẩu?', 'forgot_password'); return false;" style="color:#2563eb; font-weight:700; text-decoration:underline;">Quên mật khẩu?</a>
                     </div>
                 </div>
-
-                <!-- PHẦN ĐĂNG NHẬP DÀNH CHO ADMIN -->
-                <div style="margin-top:20px; padding-top:14px; border-top:1px dashed #dce0e3; text-align:center;">
-                    <a href="#" onclick="document.getElementById('loginMethodsList').style.display='none'; document.getElementById('loginFormSection').style.display='none'; document.getElementById('adminLoginSectionMap').style.display='block'; return false;" style="color:#2563eb; font-size:13px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
-                        🛡️ Đăng nhập Quản trị viên (Admin) &rarr;
-                    </a>
-                </div>
             </div>`;
     }
 
-    // PANEL: ĐĂNG KÝ (Google + Email/SĐT)
+        // PANEL: ĐĂNG KÝ TÀI KHOẢN (Mở thẳng form Họ tên + Username + Email + Mật khẩu)
     else if (type === 'register') {
         contentDiv.innerHTML = `
             <div style="background:#ffffff; border-radius:18px; padding:28px 18px 24px; color:#292929; text-align:center; max-width:360px; margin:0 auto; box-shadow:0 8px 30px rgba(0,0,0,0.18);">
@@ -536,58 +499,22 @@ function openSubPanel(title, type, extraData = {}) {
                     </svg>
                 </div>
 
-                <h2 style="font-size:24px; font-weight:700; color:#292929; margin-top:16px; margin-bottom:8px;">Đăng ký tài khoản</h2>
-                <p style="font-size:13px; color:#f33a58; line-height:1.45; margin-bottom:20px;">
-                    Mỗi người nên sử dụng riêng một tài khoản, tài khoản nhiều người sử dụng chung sẽ bị khóa.
-                </p>
+                <h2 style="font-size:24px; font-weight:700; color:#292929; margin-top:16px; margin-bottom:16px;">Đăng ký tài khoản</h2>
 
-                <!-- Danh sách nút bấm: Google + Email/SĐT -->
-                <div id="regMethodsList" style="display:flex; flex-direction:column; gap:12px;">
-                    <button type="button" class="f8-pill-btn" onclick="startGoogleAuthFromMap('register')">
-                        <span class="f8-pill-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-                                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.98 0 12s.45 3.83 1.25 5.42l4.03-3.15z"/>
-                                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                            </svg>
-                        </span>
-                        <span class="f8-pill-text">Đăng ký với Google</span>
-                    </button>
-
-                    <button type="button" class="f8-pill-btn" onclick="document.getElementById('regMethodsList').style.display='none'; document.getElementById('regFormSection').style.display='block';">
-                        <span class="f8-pill-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555555" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                <circle cx="12" cy="7" r="4"/>
-                            </svg>
-                        </span>
-                        <span class="f8-pill-text" style="color:#111111;">Sử dụng email / số điện thoại</span>
-                    </button>
-                </div>
-
-                <!-- Form đăng ký khi bấm Sử dụng email / SĐT -->
-                <div id="regFormSection" style="display:none; text-align:left;">
-                    <button type="button" class="f8-btn-back" onclick="document.getElementById('regFormSection').style.display='none'; document.getElementById('regMethodsList').style.display='flex';">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                        Quay lại
-                    </button>
-
+                <div id="regFormSection" style="text-align:left;">
                     <form onsubmit="handleAuthRegister(event)" style="display:flex; flex-direction:column; gap:10px;">
                         <div>
                             <label style="font-size:12.5px; font-weight:700; color:#292929; margin-bottom:3px; display:block;">Họ và tên <span style="color:#f33a58;">*</span></label>
                             <input type="text" id="regFullName" class="f8-form-input" placeholder="Ví dụ: Nguyễn Văn A" required>
                         </div>
                         <div>
+                            <label style="font-size:12.5px; font-weight:700; color:#292929; margin-bottom:3px; display:block;">Tên đăng nhập (Username) <span style="color:#f33a58;">*</span></label>
+                            <input type="text" id="regUsername" class="f8-form-input" placeholder="Ví dụ: nguyenvana (3-30 ký tự)" required minlength="3" maxlength="30">
+                        </div>
+                        <div>
                             <label style="font-size:12.5px; font-weight:700; color:#292929; margin-bottom:3px; display:block;">Email <span style="color:#f33a58;">*</span></label>
                             <input type="email" id="regEmail" class="f8-form-input" placeholder="email@domain.com" required oninput="handleEmailRealtimeCheck(this.value)" onblur="handleEmailRealtimeCheck(this.value)">
                             <div id="emailCheckStatus" style="font-size:11.5px; margin-top:3px; padding-left:8px;"></div>
-                        </div>
-                        <div>
-                            <label style="font-size:12.5px; font-weight:700; color:#292929; margin-bottom:3px; display:block;">Số điện thoại (tùy chọn)</label>
-                            <input type="tel" id="regPhone" class="f8-form-input" placeholder="Ví dụ: 0912345678">
                         </div>
                         <div>
                             <label style="font-size:12.5px; font-weight:700; color:#292929; margin-bottom:3px; display:block;">Mật khẩu <span style="color:#f33a58;">*</span></label>
@@ -612,12 +539,9 @@ function openSubPanel(title, type, extraData = {}) {
                 </div>
 
                 <!-- Liên kết điều hướng bên dưới -->
-                <div style="margin-top:24px; text-align:center; font-size:13.5px; color:#35414c;">
+                <div style="margin-top:20px; text-align:center; font-size:13.5px; color:#35414c;">
                     <div>
                         Bạn đã có tài khoản? <a href="#" onclick="openSubPanel('Đăng nhập', 'login'); return false;" style="color:#2563eb; font-weight:700; text-decoration:underline;">Đăng nhập</a>
-                    </div>
-                    <div style="margin-top:12px;">
-                        <a href="#" onclick="openSubPanel('Quên mật khẩu?', 'forgot_password'); return false;" style="color:#2563eb; font-weight:700; text-decoration:underline;">Quên mật khẩu?</a>
                     </div>
                 </div>
             </div>`;

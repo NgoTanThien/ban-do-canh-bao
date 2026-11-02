@@ -47,7 +47,7 @@ class UserModel {
     public function findById($id)
     {
         $stmt = $this->conn->prepare(
-            "SELECT id, username, full_name, avatar, email, phone, role, status, is_verified, reputation_score, created_at FROM users WHERE id = ? LIMIT 1"
+            "SELECT id, username, full_name, avatar, email, role, status, is_verified, reputation_score, created_at FROM users WHERE id = ? LIMIT 1"
         );
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -68,9 +68,9 @@ class UserModel {
     public function findByAccount(string $account)
     {
         $stmt = $this->conn->prepare(
-            "SELECT * FROM users WHERE username = ? OR email = ? OR phone = ? LIMIT 1"
+            "SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1"
         );
-        $stmt->bind_param("sss", $account, $account, $account);
+        $stmt->bind_param("ss", $account, $account);
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc() ?: null;
     }
@@ -158,13 +158,13 @@ class UserModel {
     }
 
     // Đăng ký tài khoản (hỗ trợ họ tên, sđt)
-    public function registerWithProfile(string $username, string $fullName, string $email, string $phone, string $password): int
+    public function registerWithProfile(string $username, string $fullName, string $email, string $password): int
     {
         $hashed = password_hash($password, PASSWORD_BCRYPT);
         $stmt = $this->conn->prepare(
-            "INSERT INTO users(username, full_name, email, phone, password) VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO users(username, full_name, email, password) VALUES (?, ?, ?, ?)"
         );
-        $stmt->bind_param("sssss", $username, $fullName, $email, $phone, $hashed);
+        $stmt->bind_param("sssss", $username, $fullName, $email, $hashed);
         $stmt->execute();
         return (int)$this->conn->insert_id;
     }
@@ -209,7 +209,7 @@ class UserModel {
     public function listAll()
     {
         $result = $this->conn->query(
-            "SELECT id, username, full_name, email, phone, role, status, reputation_score, created_at FROM users ORDER BY id DESC"
+            "SELECT id, username, full_name, email, role, status, reputation_score, created_at FROM users ORDER BY id DESC"
         );
         return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }

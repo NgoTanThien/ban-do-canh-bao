@@ -37,6 +37,7 @@ function handleEmailRealtimeCheck(email) {
 }
 
 // 2. Xử lý Đăng nhập tài khoản qua API (Kèm Remember Me 30 ngày)
+// 2. Xử lý Đăng nhập tài khoản qua API (Tự động phân quyền User / Admin)
 async function handleAuthLogin(e) {
     e.preventDefault();
     const btn = document.getElementById('btnLoginSubmit');
@@ -47,9 +48,16 @@ async function handleAuthLogin(e) {
     if (btn) { btn.disabled = true; btn.innerText = 'Đang đăng nhập...'; }
 
     try {
-        await Api.login(u, p, rememberMe);
-        showToast("Đăng nhập thành công!", true);
-        setTimeout(() => window.location.reload(), 600);
+        const res = await Api.login(u, p, rememberMe);
+        if (res && res.role === 'admin') {
+            showToast("Xin chào Quản trị viên! Đang vào trang quản trị...", true);
+            setTimeout(() => {
+                window.location.href = 'index.php?route=admin_dashboard';
+            }, 600);
+        } else {
+            showToast("Đăng nhập thành công!", true);
+            setTimeout(() => window.location.reload(), 600);
+        }
     } catch (err) {
         showToast(err.message || "Đăng nhập thất bại!", false);
         if (btn) { btn.disabled = false; btn.innerText = 'Đăng nhập'; }
@@ -61,9 +69,8 @@ async function handleAuthRegister(e) {
     e.preventDefault();
     const btn = document.getElementById('btnRegisterSubmit');
     const fullName = document.getElementById('regFullName').value.trim();
+     const username = document.getElementById('regUsername').value.trim();
     const email = document.getElementById('regEmail').value.trim();
-    const phone = document.getElementById('regPhone') ? document.getElementById('regPhone').value.trim() : '';
-    const username = document.getElementById('regUsername') ? document.getElementById('regUsername').value.trim() : '';
     const password = document.getElementById('regPassword').value;
     const confirmPassword = document.getElementById('regConfirmPassword').value;
     const terms = document.getElementById('regTermsAgree') ? document.getElementById('regTermsAgree').checked : false;
@@ -87,7 +94,6 @@ async function handleAuthRegister(e) {
         const payload = {
             full_name: fullName,
             email: email,
-            phone: phone,
             username: username,
             password: password,
             confirm_password: confirmPassword,
@@ -353,31 +359,6 @@ async function startGoogleAuthFromMap(mode = 'login') {
         }
         window.location.href = (mode === 'register') ? 'index.php?route=register' : 'index.php?route=login';
     }, 400);
-}
-
-async function handleAdminLoginFromMap(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnMapAdminSubmit');
-    const account = document.getElementById('mapAdminAccount').value.trim();
-    const password = document.getElementById('mapAdminPassword').value;
-
-    if (btn) { btn.disabled = true; btn.innerText = 'Đang xác thực...'; }
-
-    try {
-        const res = await Api.login(account, password, true);
-        if (res && res.role === 'admin') {
-            showToast("Đăng nhập Quản trị viên thành công!", true);
-            setTimeout(() => {
-                window.location.href = 'index.php?route=admin_dashboard';
-            }, 600);
-        } else {
-            showToast("Tài khoản này không có quyền Quản trị viên!", false);
-            if (btn) { btn.disabled = false; btn.innerText = 'Đăng nhập Quản trị viên'; }
-        }
-    } catch (err) {
-        showToast(err.message || "Đăng nhập Quản trị viên thất bại!", false);
-        if (btn) { btn.disabled = false; btn.innerText = 'Đăng nhập Quản trị viên'; }
-    }
 }
 
 // 10. Tự động kiểm tra URL query parameters để mở đúng sub-panel

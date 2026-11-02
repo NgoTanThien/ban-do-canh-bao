@@ -38,9 +38,8 @@ class AuthController {
     public function register(array $in): array
     {
         $fullName = trim($in['full_name'] ?? $in['fullname'] ?? '');
-        $emailOrPhone = trim($in['email'] ?? $in['phone'] ?? '');
+        $email = trim($in['email'] ?? $in['phone'] ?? '');
         $username = trim($in['username'] ?? '');
-        $phone = trim($in['phone'] ?? '');
         $password = (string)($in['password'] ?? '');
         $confirm = (string)($in['confirm_password'] ?? '');
         $termsAgree = !empty($in['terms_agree']) || !empty($in['terms']);
@@ -53,18 +52,9 @@ class AuthController {
             return $this->fail('Vui lòng nhập họ và tên!', 422);
         }
 
-        // Tách email hoặc số điện thoại
-        $email = '';
-        if (filter_var($emailOrPhone, FILTER_VALIDATE_EMAIL)) {
-            $email = $emailOrPhone;
-        } elseif (preg_match('/^[0-9\+\-\. ]{9,15}$/', $emailOrPhone)) {
-            $phone = $emailOrPhone;
-            $email = trim($in['email_backup'] ?? '');
-        }
-
-        if ($email === '') {
-            return $this->fail('Vui lòng cung cấp địa chỉ Email hợp lệ để nhận mã xác thực OTP!', 422);
-        }
+          if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+         return $this->fail('Vui lòng cung cấp địa chỉ Email hợp lệ để nhận mã xác thực OTP!', 422);
+     }
 
         // Nếu người dùng không nhập username, tự sinh từ email
         if ($username === '') {
@@ -103,7 +93,6 @@ class AuthController {
             'username'  => $username,
             'full_name' => $fullName,
             'email'     => $email,
-            'phone'     => $phone,
             'password'  => $password,
         ];
 
@@ -154,7 +143,6 @@ class AuthController {
                 $p['username'],
                 $p['full_name'],
                 $p['email'],
-                $p['phone'] ?? '',
                 $p['password']
             );
         } catch (mysqli_sql_exception $e) {
@@ -584,7 +572,6 @@ class AuthController {
             'full_name'        => $u['full_name'] ?? '',
             'avatar'           => $u['avatar'] ?? '',
             'email'            => $u['email'] ?? '',
-            'phone'            => $u['phone'] ?? '',
             'role'             => $u['role'],
             'is_verified'      => (int)($u['is_verified'] ?? 1),
             'reputation_score' => (int)($u['reputation_score'] ?? 10),

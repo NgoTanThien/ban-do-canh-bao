@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 // Chặn truy cập nếu không phải Admin
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-    header('Location: index.php?route=admin_login');
+    header('Location: index.php?route=home');
     exit;
 }
 ?>

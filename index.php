@@ -18,72 +18,19 @@ restore_remember_me_session();
 $route = $_GET['route'] ?? 'home';
 
 switch ($route) {
-    // 1. TRANG ĐĂNG NHẬP
-    case 'login':
-    case 'admin_login':
-        if (isset($_SESSION['user_id'])) {
-            $redirect = (($_SESSION['role'] ?? 'user') === 'admin') 
-                ? 'index.php?route=admin_dashboard' 
-                : 'index.php?route=home';
-            header("Location: $redirect");
-            exit;
-        }
-        if (file_exists(__DIR__ . '/views/auth/login.php')) {
-            require_once __DIR__ . '/views/auth/login.php';
-        } else {
-            header('Location: index.php?route=home');
-        }
-        exit;
-
-    // 2. TRANG ĐĂNG KÝ
-    case 'register':
-        if (isset($_SESSION['user_id'])) {
-            header('Location: index.php?route=home');
-            exit;
-        }
-        if (file_exists(__DIR__ . '/views/auth/register.php')) {
-            require_once __DIR__ . '/views/auth/register.php';
-        } else {
-            header('Location: index.php?route=home');
-        }
-        exit;
-
-    // 3. QUÊN MẬT KHẨU
-    case 'forgot_password':
-        if (isset($_SESSION['user_id'])) {
-            header('Location: index.php?route=home');
-            exit;
-        }
-        if (file_exists(__DIR__ . '/views/auth/forgot_password.php')) {
-            require_once __DIR__ . '/views/auth/forgot_password.php';
-        } else {
-            header('Location: index.php?route=home');
-        }
-        exit;
-
-    // 4. ĐẶT LẠI MẬT KHẨU
-    case 'reset_password':
-        if (file_exists(__DIR__ . '/views/auth/reset_password.php')) {
-            require_once __DIR__ . '/views/auth/reset_password.php';
-        } else {
-            header('Location: index.php?route=home');
-        }
-        exit;
-
-    // 5. ĐĂNG XUẤT (Xóa sạch session, token DB & cookie)
+    // 1. ĐĂNG XUẤT (Xóa sạch session, token DB & cookie)
     case 'logout':
         (new AuthController($conn))->logout();
         header('Location: index.php?route=home');
         exit;
 
-    // 6. TRANG QUẢN TRỊ VIÊN (ADMIN DASHBOARD)
+    // 2. TRANG QUẢN TRỊ VIÊN (ADMIN DASHBOARD)
     case 'admin_dashboard':
     case 'admin':
         if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-            header('Location: index.php?route=admin_login');
+            header('Location: index.php?route=home');
             exit;
         }
-        
         if (file_exists(__DIR__ . '/views/admin/dashboard.php')) {
             require_once __DIR__ . '/views/admin/dashboard.php';
         } else {
@@ -91,7 +38,7 @@ switch ($route) {
         }
         exit;
 
-    // 7. MẶC ĐỊNH: HIỂN THỊ BẢN ĐỒ CÔNG CỘNG
+    // 3. MẶC ĐỊNH: HIỂN THỊ BẢN ĐỒ CÔNG CỘNG
     case 'home':
     default:
         break;

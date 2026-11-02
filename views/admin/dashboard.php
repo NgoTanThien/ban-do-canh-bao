@@ -200,7 +200,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
                                 <tr>
                                     <th>ID</th>
                                     <th>Khách hàng / Thành viên</th>
-                                    <th>Liên hệ (Email / SĐT)</th>
+                                    <th>Email</th>
                                     <th>Vai trò</th>
                                     <th>Điểm uy tín</th>
                                     <th>Đóng góp</th>

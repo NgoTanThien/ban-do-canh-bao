@@ -208,9 +208,8 @@ class UserModel {
 
     public function listAll()
     {
-        $sql = "SELECT u.id, u.username, u.full_name, u.email, u.phone, u.avatar, u.role, u.status, u.is_verified, u.reputation_score, u.created_at,
-                       (SELECT COUNT(*) FROM reports r WHERE r.user_id = u.id) AS report_count,
-                       (SELECT COUNT(*) FROM sos_requests s WHERE s.user_id = u.id) AS sos_count
+        $sql = "SELECT u.id, u.username, u.full_name, u.email, u.avatar, u.role, u.status, u.is_verified, u.reputation_score, u.created_at,
+                       (SELECT COUNT(*) FROM reports r WHERE r.user_id = u.id) AS report_count
                 FROM users u
                 ORDER BY u.id DESC";
         $result = $this->conn->query($sql);

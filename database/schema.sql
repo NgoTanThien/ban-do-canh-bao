@@ -87,3 +87,46 @@ CREATE TABLE IF NOT EXISTS `email_otps` (
 
     INDEX `idx_email_action` (`email`, `action`)
 ) ENGINE=InnoDB;
+
+USE `traffic_map_db`;
+
+-- 1. Bổ sung các cột mới vào bảng `users` hiện tại (giữ nguyên dữ liệu cũ)
+ALTER TABLE `users`
+    ADD COLUMN IF NOT EXISTS `full_name` VARCHAR(100) NULL AFTER `username`,
+    ADD COLUMN IF NOT EXISTS `avatar` VARCHAR(255) NULL AFTER `full_name`,
+    ADD COLUMN IF NOT EXISTS `google_id` VARCHAR(100) NULL AFTER `email`,
+    ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20) NULL AFTER `google_id`,
+    ADD COLUMN IF NOT EXISTS `is_verified` TINYINT(1) DEFAULT 0 AFTER `status`,
+    ADD INDEX IF NOT EXISTS `idx_google_id` (`google_id`);
+
+-- Đánh dấu các tài khoản cũ đã có sẵn là đã xác thực
+UPDATE `users` SET `is_verified` = 1 WHERE `is_verified` = 0;
+
+-- 2. Tạo bảng `user_tokens` (Dùng cho Remember Me 30 ngày & Đặt lại mật khẩu)
+CREATE TABLE IF NOT EXISTS `user_tokens` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `token_hash` VARCHAR(64) NOT NULL,
+    `type` ENUM('remember_me', 'reset_password') NOT NULL,
+    `expires_at` DATETIME NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT `fk_tokens_user` FOREIGN KEY (`user_id`)
+        REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_token_type` (`token_hash`, `type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Tạo bảng `email_otps` (Dùng cho mã OTP 6 số khi Đăng ký & Quên mật khẩu)
+CREATE TABLE IF NOT EXISTS `email_otps` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `email` VARCHAR(100) NOT NULL,
+    `otp_code` VARCHAR(10) NOT NULL,
+    `action` ENUM('register', 'reset_password') NOT NULL,
+    `data` TEXT NULL,
+    `expires_at` DATETIME NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX `idx_email_action` (`email`, `action`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `users` DROP COLUMN `phone`;

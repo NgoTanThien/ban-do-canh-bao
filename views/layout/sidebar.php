@@ -20,21 +20,7 @@
         <!-- Thân Sidebar có thanh cuộn mượt mà (Scrollable Body) -->
         <div class="sidebar-body" style="flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; display: flex; flex-direction: column;">
             <div class="sidebar-menu">
-                <a href="#" class="menu-item" onclick="openRoutingModal(); toggleSidebar(); return false;">
-                    <i class="ph-bold ph-navigation-arrow" style="color: #10b981;"></i>
-                    <span>Tìm đường né ngập</span>
-                    <span class="badge-pill green">AI</span>
-                </a>
-                <a href="#" class="menu-item" onclick="openWeatherModal(); toggleSidebar(); return false;">
-                    <i class="ph-bold ph-cloud-rain" style="color: #38bdf8;"></i>
-                    <span>Dự báo ngập & Thủy triều</span>
-                    <span class="badge-pill blue">1-3h</span>
-                </a>
-                <a href="#" class="menu-item" onclick="openSosModal(); toggleSidebar(); return false;">
-                    <i class="ph-bold ph-first-aid" style="color: #ef4444;"></i>
-                    <span>Cứu hộ khẩn cấp SOS</span>
-                    <span class="badge-pill red">Hotline</span>
-                </a>
+    
                 <a href="#" class="menu-item" onclick="openSubPanel('Chú giải chuẩn 4 cấp', 'legend'); return false;">
                     <i class="ph ph-list-dashes"></i>
                     <span>Chú giải chuẩn 4 cấp</span>
@@ -148,7 +134,7 @@
             <button type="button" class="btn-close-sidebar" onclick="closeReportPanel()" title="Quay lại">
                 <i class="ph ph-caret-left"></i>
             </button>
-            <h3 style="color: white; font-size: 1.05rem; flex: 1; font-weight: 700;">Báo Cáo Sự Cố Nhanh (3 Chạm)</h3>
+            <h3 style="color: white; font-size: 1.05rem; flex: 1; font-weight: 700;">Báo Cáo Sự Cố</h3>
             <button type="button" class="btn-close-sidebar" onclick="closeReportPanel()" title="Đóng sidebar">
                 <i class="ph ph-x"></i>
             </button>
@@ -186,21 +172,7 @@
                                 <i class="ph-bold ph-car" style="color: #fb923c; font-size: 1.5rem;"></i>
                                 <span style="color: #ffffff !important; font-weight: 700;">Kẹt xe</span>
                             </label>
-                            <label class="incident-radio-card" onclick="selectIncidentType('cay_do', this)" style="background: #27272a; border: 1.5px solid #3f3f46; border-radius: 10px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #ffffff !important; text-align: center; font-size: 0.82rem; font-weight: 600; transition: all 0.2s;">
-                                <input type="radio" name="type" value="cay_do" style="display:none;">
-                                <i class="ph-bold ph-tree" style="color: #22c55e; font-size: 1.5rem;"></i>
-                                <span style="color: #ffffff !important; font-weight: 700;">Cây đổ</span>
-                            </label>
-                            <label class="incident-radio-card" onclick="selectIncidentType('tai_nan', this)" style="background: #27272a; border: 1.5px solid #3f3f46; border-radius: 10px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #ffffff !important; text-align: center; font-size: 0.82rem; font-weight: 600; transition: all 0.2s;">
-                                <input type="radio" name="type" value="tai_nan" style="display:none;">
-                                <i class="ph-bold ph-warning-octagon" style="color: #ef4444; font-size: 1.5rem;"></i>
-                                <span style="color: #ffffff !important; font-weight: 700;">Tai nạn</span>
-                            </label>
-                            <label class="incident-radio-card" onclick="selectIncidentType('rao_chan', this)" style="background: #27272a; border: 1.5px solid #3f3f46; border-radius: 10px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #ffffff !important; text-align: center; font-size: 0.82rem; font-weight: 600; transition: all 0.2s;">
-                                <input type="radio" name="type" value="rao_chan" style="display:none;">
-                                <i class="ph-bold ph-barrier" style="color: #eab308; font-size: 1.5rem;"></i>
-                                <span style="color: #ffffff !important; font-weight: 700;">Rào chắn</span>
-                            </label>
+    
                         </div>
                     </div>
 
@@ -318,6 +290,7 @@
 // Điều khiển chọn loại sự cố trực quan
 function selectIncidentType(type, cardEl) {
     document.querySelectorAll('.incident-type-selector .incident-radio-card').forEach(c => {
+        c.classList.remove('active');
         c.style.background = '#27272a';
         c.style.border = '1.5px solid #3f3f46';
         const inp = c.querySelector('input');
@@ -325,6 +298,7 @@ function selectIncidentType(type, cardEl) {
     });
 
     if (cardEl) {
+        cardEl.classList.add('active');
         cardEl.style.background = 'rgba(56, 189, 248, 0.2)';
         cardEl.style.border = '2px solid #38bdf8';
         const inp = cardEl.querySelector('input');
@@ -349,32 +323,44 @@ function selectIncidentType(type, cardEl) {
 // Điều khiển chọn mức nước
 function selectVisualDepth(val, cardEl) {
     document.querySelectorAll('#field-flood-depth .visual-level-card').forEach(c => {
+        c.classList.remove('active');
         c.style.background = '#27272a';
         c.style.border = '1.5px solid #3f3f46';
         const inp = c.querySelector('input');
         if (inp) inp.checked = false;
     });
     if (cardEl) {
+        cardEl.classList.add('active');
         cardEl.style.background = 'rgba(56, 189, 248, 0.2)';
         cardEl.style.border = '2px solid #38bdf8';
         const inp = cardEl.querySelector('input');
         if (inp) inp.checked = true;
+    }
+    const sevInput = document.getElementById('computed_severity');
+    if (sevInput) {
+        sevInput.value = (val === 'mat_ca') ? 'nhe' : (val === 'yen_xe' ? 'nghiem_trong' : 'vua');
     }
 }
 
 // Điều khiển chọn tốc độ giao thông
 function selectTrafficSpeed(val, cardEl) {
     document.querySelectorAll('#field-traffic-speed .visual-level-card').forEach(c => {
+        c.classList.remove('active');
         c.style.background = '#27272a';
         c.style.border = '1.5px solid #3f3f46';
         const inp = c.querySelector('input');
         if (inp) inp.checked = false;
     });
     if (cardEl) {
+        cardEl.classList.add('active');
         cardEl.style.background = 'rgba(56, 189, 248, 0.2)';
         cardEl.style.border = '2px solid #38bdf8';
         const inp = cardEl.querySelector('input');
         if (inp) inp.checked = true;
+    }
+    const sevInput = document.getElementById('computed_severity');
+    if (sevInput) {
+        sevInput.value = (val === 'cham') ? 'nhe' : (val === 'tac_nghen' ? 'nghiem_trong' : 'vua');
     }
 }
 

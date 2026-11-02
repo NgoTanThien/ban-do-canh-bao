@@ -19,8 +19,16 @@ echo "\xEF\xBB\xBF";
 $fp = fopen('php://output', 'w');
 fputcsv($fp, ['ID', 'Loại sự cố', 'Mức độ', 'Địa chỉ', 'Kinh độ (Lng)', 'Vĩ độ (Lat)', 'Người báo', 'Lượt xác nhận', 'Lượt báo sai', 'Trạng thái', 'Thời gian']);
 
+$typeMap = [
+    'ngap_nuoc' => 'Ngập nước',
+    'ket_xe'    => 'Kẹt xe',
+    'cay_do'    => 'Cây đổ',
+    'tai_nan'   => 'Tai nạn',
+    'rao_chan'  => 'Rào chắn'
+];
+
 foreach ($reports as $r) {
-    $typeText = ($r['type'] === 'ngap_nuoc') ? 'Ngập nước' : 'Kẹt xe';
+    $typeText = $typeMap[$r['type']] ?? $r['type'];
     $statusText = ($r['status'] === 'dang_dien_ra') ? 'Đang diễn ra' : (($r['status'] === 'da_ket_thuc') ? 'Đã kết thúc' : 'Bị ẩn');
     fputcsv($fp, [
         $r['id'],

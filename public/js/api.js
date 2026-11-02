@@ -81,7 +81,7 @@ const Api = {
 
     // --- Quản trị Admin ---
     adminUsers:        ()                           => apiRequest('admin/users.php'),
-    adminUserStatus:   (userId, action)             => apiRequest('admin/user_status.php', { method: 'POST', body: { user_id: userId, action } }),
+    adminUserStatus:   (userId, action, extra = {}) => apiRequest('admin/user_status.php', { method: 'POST', body: { user_id: userId, action, ...extra } }),
     adminReports:      (status = 'all')             => apiRequest('admin/reports.php', { query: { status } }),
     adminReportAction: (reportId, action)           => apiRequest('admin/reports.php', { method: 'POST', body: { report_id: reportId, action } }),
     adminSos:          ()                           => apiRequest('admin/sos.php'),

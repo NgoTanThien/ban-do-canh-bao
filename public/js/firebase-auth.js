@@ -9,7 +9,8 @@ import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.g
 import { 
     getAuth, 
     GoogleAuthProvider, 
-    signInWithPopup 
+    signInWithPopup,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // Cấu hình Firebase Web App của dự án
@@ -158,3 +159,15 @@ window.loginWithFirebaseGoogle = async function(mode = 'login') {
     }
 };
 
+
+// Hàm đăng xuất sạch sẽ tài khoản Google khỏi Firebase Auth SDK
+window.logoutFirebaseGoogle = async function() {
+    try {
+        if (typeof auth !== 'undefined' && auth) {
+            await signOut(auth);
+            console.log('[Firebase Auth] Đã đăng xuất Google thành công');
+        }
+    } catch (e) {
+        console.warn('[Firebase SignOut]', e);
+    }
+};

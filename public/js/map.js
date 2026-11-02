@@ -242,14 +242,34 @@ function renderMarkers(reports) {
     }
 
     filteredReports.forEach(r => {
-        const isFlood = (r.type === 'ngap_nuoc' || r.report_type === 'flood');
-        const pulseClass = isFlood ? 'pulse-marker-flood' : 'pulse-marker-traffic';
+        const type = r.type || r.report_type || 'ngap_nuoc';
+        let emoji = '🌊';
+        let pulseClass = 'pulse-marker-flood';
+        let typeBadge = '<span style="background: rgba(2, 132, 199, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🌊 NGẬP NƯỚC</span>';
+
+        if (type === 'ket_xe' || type === 'traffic') {
+            emoji = '🚗';
+            pulseClass = 'pulse-marker-traffic';
+            typeBadge = '<span style="background: rgba(249, 115, 22, 0.2); color: #fb923c; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🚗 KẸT XE</span>';
+        } else if (type === 'cay_do') {
+            emoji = '🌳';
+            pulseClass = 'pulse-marker-flood';
+            typeBadge = '<span style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🌳 CÂY ĐỔ</span>';
+        } else if (type === 'tai_nan') {
+            emoji = '🛑';
+            pulseClass = 'pulse-marker-traffic';
+            typeBadge = '<span style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🛑 TAI NẠN</span>';
+        } else if (type === 'rao_chan') {
+            emoji = '🚧';
+            pulseClass = 'pulse-marker-flood';
+            typeBadge = '<span style="background: rgba(234, 179, 8, 0.2); color: #eab308; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🚧 RÀO CHẮN</span>';
+        }
 
         const customIcon = L.divIcon({
             className: pulseClass,
-            iconSize: [26, 26],
-            iconAnchor: [13, 13],
-            html: `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:12px; line-height:1;">${isFlood ? '🌊' : '🚦'}</div>`
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            html: `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:14px; line-height:1;">${emoji}</div>`
         });
 
         const lat = parseFloat(r.latitude);
@@ -258,11 +278,6 @@ function renderMarkers(reports) {
 
         const marker = L.marker([lat, lng], { icon: customIcon });
 
-        // Tên hiển thị loại và tiêu đề
-        const typeBadge = isFlood
-            ? `<span style="background: rgba(2, 132, 199, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🌊 NGẬP NƯỚC</span>`
-            : `<span style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">🚦 KẸT XE</span>`;
-
         const titleText = r.address_text || r.title || 'Điểm sự cố';
         const descText = r.description || 'Không có mô tả chi tiết.';
         const upCount = r.confirm_count || r.upvotes || 0;
@@ -270,19 +285,36 @@ function renderMarkers(reports) {
         const timeText = r.created_at || 'Vừa xong';
         const reporter = r.username ? `Người báo: <b>${r.username}</b>` : '';
 
+        let extraMetric = '';
+        if (r.water_depth_cm && parseInt(r.water_depth_cm) > 0) {
+            extraMetric += `<span style="background:rgba(56,189,248,0.18); color:#38bdf8; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">💧 Ngập: ${r.water_depth_cm}cm</span> `;
+        }
+        if (r.speed_kmh && parseFloat(r.speed_kmh) > 0) {
+            extraMetric += `<span style="background:rgba(251,146,60,0.18); color:#fb923c; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">⚡ ${r.speed_kmh} km/h</span> `;
+        }
+
+        let imgHtml = '';
+        if (r.image_url && r.image_url !== '0' && r.image_url !== '') {
+            imgHtml = `<div style="margin:6px 0;"><img src="${r.image_url}" alt="Ảnh hiện trường" style="width:100%; max-height:140px; object-fit:cover; border-radius:8px; border:1px solid #3f3f46;"></div>`;
+        }
+
         const popupHtml = `
-            <div style="font-size: 0.9rem; line-height: 1.5; min-width: 200px;">
-                <div style="margin-bottom: 6px;">${typeBadge}</div>
+            <div style="font-size: 0.9rem; line-height: 1.5; min-width: 220px; max-width: 280px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                    ${typeBadge}
+                    ${extraMetric}
+                </div>
                 <b style="color: white; font-size: 0.98rem; display: block; margin-bottom: 4px;">${titleText}</b>
-                <p style="margin: 4px 0 8px 0; color: #a1a1aa; font-size: 0.85rem;">${descText}</p>
-                <div style="font-size: 0.75rem; color: #71717a; margin-bottom: 8px;">
+                ${imgHtml}
+                <p style="margin: 4px 0 8px 0; color: #cbd5e1; font-size: 0.85rem;">${descText}</p>
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">
                     ${reporter ? reporter + ' • ' : ''}${timeText}
                 </div>
                 <div style="display: flex; gap: 8px; border-top: 1px solid #3f3f46; padding-top: 8px;">
-                    <button onclick="voteReport(${r.id}, 'confirm')" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid #3f3f46; background: #27272a; color: #34d399; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    <button onclick="voteReport(${r.id}, 'confirm')" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid #3f3f46; background: #27272a; color: #34d399; font-weight:700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
                         👍 Đúng (${upCount})
                     </button>
-                    <button onclick="voteReport(${r.id}, 'reject')" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid #3f3f46; background: #27272a; color: #f87171; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    <button onclick="voteReport(${r.id}, 'reject')" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid #3f3f46; background: #27272a; color: #f87171; font-weight:700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
                         👎 Đã hết (${downCount})
                     </button>
                 </div>
@@ -616,111 +648,10 @@ function openSubPanel(title, type, extraData = {}) {
         newsHtml += `</div>`;
         contentDiv.innerHTML = newsHtml;
     }
-
-    // PANEL: BÁO CÁO SỰ CỐ
+    // PANEL: BÁO CÁO SỰ CỐ -> Mở khung Báo Cáo Nhanh 3 Chạm chuẩn
     else if (type === 'report' || type === 'report_traffic') {
-        const isFlood = (type === 'report');
-        const floodTabStyle = isFlood ? 'color:white; font-weight:bold; border-bottom:2px solid #3b82f6;' : 'color:#a1a1aa; border-bottom:2px solid transparent;';
-        const trafficTabStyle = !isFlood ? 'color:white; font-weight:bold; border-bottom:2px solid #3b82f6;' : 'color:#a1a1aa; border-bottom:2px solid transparent;';
-
-        const floodGrid = `
-            <label class="road-pill">
-                <input type="checkbox" name="is_whole_street" value="1" style="display:none;" checked>
-                <i class="ph-bold ph-check check-icon"></i> Ngập cả đoạn đường
-            </label>
-            <p style="color:#f59e0b; font-size:0.78rem; margin-bottom:10px;">* Chọn mức độ ngập ước tính:</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <label class="sev-label" style="padding:10px 12px; gap:8px;">
-                    <input type="radio" name="severity" value="nhe" style="display:none;" checked>
-                    <i class="ph-fill ph-waves" style="color:#60a5fa; font-size:1.2rem;"></i> <span style="color:white; font-size:0.85rem;">Mắt cá (<20cm)</span>
-                </label>
-                <label class="sev-label" style="padding:10px 12px; gap:8px;">
-                    <input type="radio" name="severity" value="vua" style="display:none;">
-                    <i class="ph-fill ph-waves" style="color:#3b82f6; font-size:1.2rem;"></i> <span style="color:white; font-size:0.85rem;">Gối (20-40cm)</span>
-                </label>
-                <label class="sev-label" style="padding:10px 12px; gap:8px;">
-                    <input type="radio" name="severity" value="nghiem_trong" style="display:none;">
-                    <i class="ph-fill ph-waves" style="color:#2563eb; font-size:1.2rem;"></i> <span style="color:white; font-size:0.85rem;">Bánh xe (>40cm)</span>
-                </label>
-                <label class="sev-label" style="padding:10px 12px; gap:8px;">
-                    <input type="radio" name="severity" value="da_ket_thuc" style="display:none;">
-                    <i class="ph-fill ph-check-circle" style="color:#10b981; font-size:1.2rem;"></i> <span style="color:white; font-size:0.85rem;">Hết ngập</span>
-                </label>
-            </div>
-        `;
-
-        const trafficGrid = `
-            <p style="color:#f59e0b; font-size:0.78rem; margin-bottom:10px;">* Chọn dạng sự cố giao thông:</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <label class="sev-label" style="padding:10px 12px; gap:8px;">
-                    <input type="radio" name="severity" value="vua" style="display:none;" checked>
-                    <i class="ph-fill ph-car" style="color:#fb923c; font-size:1.2rem;"></i> <span style="color:white; font-size:0.85rem;">Kẹt xe</span>
-                </label>
-                <label class="sev-label" style="padding:10px 12px; gap:8px;">
-                    <input type="radio" name="severity" value="nghiem_trong" style="display:none;">
-                    <i class="ph-fill ph-warning" style="color:#ea580c; font-size:1.2rem;"></i> <span style="color:white; font-size:0.85rem;">Va chạm</span>
-                </label>
-                <label class="sev-label" style="padding:10px 12px; gap:8px;">
-                    <input type="radio" name="severity" value="nghiem_trong" style="display:none;">
-                    <i class="ph-fill ph-minus-circle" style="color:#dc2626; font-size:1.2rem;"></i> <span style="color:white; font-size:0.85rem;">Đóng đường</span>
-                </label>
-                <label class="sev-label" style="padding:10px 12px; gap:8px;">
-                    <input type="radio" name="severity" value="nhe" style="display:none;">
-                    <i class="ph-fill ph-warning-circle" style="color:#eab308; font-size:1.2rem;"></i> <span style="color:white; font-size:0.85rem;">Sự cố khác</span>
-                </label>
-            </div>
-        `;
-
-        contentDiv.innerHTML = `
-            <form id="reportForm" onsubmit="handleReportSubmit(event)" style="display:flex; flex-direction:column; gap:14px;">
-                <div style="display:flex; gap:8px; border-bottom:1px solid #27272a;">
-                    <button type="button" onclick="openSubPanel('Báo điểm ngập', 'report')" style="flex:1; background:transparent; border:none; padding-bottom:8px; font-size:0.92rem; cursor:pointer; ${floodTabStyle}">
-                        <i class="ph-bold ph-waves"></i> Báo ngập
-                    </button>
-                    <button type="button" onclick="openSubPanel('Báo kẹt xe', 'report_traffic')" style="flex:1; background:transparent; border:none; padding-bottom:8px; font-size:0.92rem; cursor:pointer; ${trafficTabStyle}">
-                        <i class="ph-bold ph-car"></i> Sự cố giao thông
-                    </button>
-                </div>
-
-                <input type="text" id="report_address" name="address_text" placeholder="Địa chỉ hoặc chạm lên bản đồ..." class="form-input" required>
-
-                <div style="display:flex; gap:8px; align-items:center;">
-                    <button type="button" onclick="locateUser(true)" style="background:rgba(59, 130, 246, 0.15); border:1px solid rgba(59, 130, 246, 0.4); color:#60a5fa; padding:8px 14px; border-radius:20px; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                        <i class="ph-bold ph-crosshair"></i> Vị trí hiện tại
-                    </button>
-                    <span style="color:#a1a1aa; font-size:0.75rem;">(Hoặc chạm thẳng vào bản đồ)</span>
-                </div>
-
-                <div class="panel-card" style="margin-bottom:0;">
-                    ${isFlood ? floodGrid : trafficGrid}
-                </div>
-
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="file" id="reportImage" name="image" accept="image/*" style="display:none;" onchange="document.getElementById('imageLabel').innerText = this.files[0] ? this.files[0].name : 'Thêm ảnh thực tế'">
-                    <button type="button" onclick="document.getElementById('reportImage').click()" style="background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:10px 14px; color:#d4d4d8; display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem;">
-                        <i class="ph-bold ph-camera"></i> Thêm ảnh
-                    </button>
-                    <span id="imageLabel" style="color:#60a5fa; font-size:0.8rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
-                        Thêm ảnh để tăng uy tín
-                    </span>
-                </div>
-
-                <textarea id="report_desc" name="description" placeholder="Ghi chú chi tiết thêm..." class="form-input" style="height:70px; resize:none;"></textarea>
-
-                <div style="display:flex; gap:10px; margin-top:6px;">
-                    <button type="button" onclick="closeSubPanel()" style="flex:1; background:#27272a; border:none; padding:12px; color:white; border-radius:10px; font-weight:600; cursor:pointer;">
-                        Huỷ
-                    </button>
-                    <button type="submit" style="flex:2; background:#2563eb; border:none; padding:12px; color:white; border-radius:10px; font-weight:bold; cursor:pointer;">
-                        Gửi báo cáo
-                    </button>
-                </div>
-
-                <input type="hidden" name="type" value="${isFlood ? 'ngap_nuoc' : 'ket_xe'}">
-                <input type="hidden" id="report_lat" name="latitude">
-                <input type="hidden" id="report_lng" name="longitude">
-            </form>
-        `;
+        openReportSheet();
+        return;
     }
 
     // PANEL: ĐĂNG NHẬP (Google + Email/SĐT + Cổng Admin)
@@ -982,9 +913,7 @@ function openSubPanel(title, type, extraData = {}) {
                 </p>
 
                 <!-- Khu vực Form (chiều rộng 360px, căn giữa) -->
-                <div id="f8ForgotDebugBox" style="display:none; background:#f0fdfa; border:1px dashed #1dbfaf; color:#0f766e; padding:8px 12px; border-radius:10px; font-size:12.5px; margin-bottom:12px;">
-                    💡 <b>Môi trường thử nghiệm:</b> Mã OTP là: <span id="f8DebugOtpCode" style="font-weight:bold; letter-spacing:2px; color:#111;"></span>
-                </div>
+                <!-- Mã OTP được bảo mật gửi qua Email -->
 
                 <form onsubmit="handleF8ResetPasswordSubmit(event)" style="display:flex; flex-direction:column;">
                     <label style="font-size:14px; font-weight:700; color:#292929; margin-bottom:8px; text-align:left;">Tên đăng nhập</label>
@@ -2123,7 +2052,7 @@ async function handleF8ResetPasswordSubmit(e) {
 
         showToast('Đặt lại mật khẩu thành công! Vui lòng đăng nhập.', true);
         setTimeout(() => {
-            openSubPanel('Đăng nhập vào F8', 'login');
+            openSubPanel('Đăng nhập tài khoản', 'login');
         }, 900);
     } catch (err) {
         showToast(err.message || 'Đặt lại mật khẩu thất bại!', false);

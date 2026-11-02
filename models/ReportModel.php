@@ -7,27 +7,6 @@ class ReportModel {
     public function __construct($db) {
         $this->conn = $db;
     }
-
-    // // Danh sách báo cáo đang diễn ra (kèm tên người báo + điểm uy tín)
-    // public function getActiveReports(?string $type = null): array {
-    //     $sql = "SELECT r.*,
-    //                    COALESCE(u.username, 'Ẩn danh') AS username,
-    //                    COALESCE(u.reputation_score, 0) AS reputation_score
-    //             FROM reports r
-    //             LEFT JOIN users u ON r.user_id = u.id
-    //             WHERE r.status = 'dang_dien_ra'";
-    //     if ($type !== null) {
-    //         $sql .= " AND r.type = ?";
-    //     }
-    //     $sql .= " ORDER BY r.created_at DESC";
-
-    //     $stmt = $this->conn->prepare($sql);
-    //     if ($type !== null) {
-    //         $stmt->bind_param("s", $type);
-    //     }
-    //     $stmt->execute();
-    //     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    // }
         // Tự động quét và ẩn các điểm đã quá hạn
     // - Ngập lụt: quá 4 tiếng không có ai xác nhận thêm
     // - Kẹt xe: quá 2 tiếng không có ai xác nhận thêm
@@ -37,8 +16,8 @@ class ReportModel {
                 WHERE status = 'dang_dien_ra' 
                   AND (
                       (expires_at IS NOT NULL AND expires_at <= NOW())
-                      OR (expires_at IS NULL AND type = 'ngap_nuoc' AND updated_at <= DATE_SUB(NOW(), INTERVAL 4 HOUR))
-                      OR (expires_at IS NULL AND type = 'ket_xe' AND updated_at <= DATE_SUB(NOW(), INTERVAL 2 HOUR))
+                      OR (expires_at IS NULL AND type = 'ngap_nuoc' AND updated_at <= DATE_SUB(NOW(), INTERVAL 24 HOUR))
+                      OR (expires_at IS NULL AND type = 'ket_xe' AND updated_at <= DATE_SUB(NOW(), INTERVAL 12 HOUR))
                   )";
         $this->conn->query($sql);
     }
@@ -70,7 +49,7 @@ class ReportModel {
         // Trả về id mới (int) hoặc false
     public function createReport($userId, $type, $severity, $latitude, $longitude, $addressText, $description, $imageUrl = null) {
         // Ngập nước: 4 tiếng | Kẹt xe: 2 tiếng
-        $expireHours = ($type === 'ngap_nuoc') ? 4 : 2;
+        $expireHours = ($type === 'ngap_nuoc') ? 12 : 6;
 
         $sql = "INSERT INTO reports (user_id, type, severity, latitude, longitude, address_text, description, image_url, confirm_count, reject_count, status, expires_at, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 'dang_dien_ra', DATE_ADD(NOW(), INTERVAL ? HOUR), NOW(), NOW())";

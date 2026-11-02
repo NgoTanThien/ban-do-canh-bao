@@ -208,10 +208,35 @@ class UserModel {
 
     public function listAll()
     {
-        $result = $this->conn->query(
-            "SELECT id, username, full_name, email, phone, role, status, reputation_score, created_at FROM users ORDER BY id DESC"
-        );
+        $sql = "SELECT u.id, u.username, u.full_name, u.email, u.phone, u.avatar, u.role, u.status, u.is_verified, u.reputation_score, u.created_at,
+                       (SELECT COUNT(*) FROM reports r WHERE r.user_id = u.id) AS report_count,
+                       (SELECT COUNT(*) FROM sos_requests s WHERE s.user_id = u.id) AS sos_count
+                FROM users u
+                ORDER BY u.id DESC";
+        $result = $this->conn->query($sql);
         return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function setRole(int $id, string $role): bool
+    {
+        if (!in_array($role, ['user', 'admin'], true)) return false;
+        $stmt = $this->conn->prepare("UPDATE users SET role = ? WHERE id = ?");
+        $stmt->bind_param("si", $role, $id);
+        return $stmt->execute();
+    }
+
+    public function setReputationScore(int $id, int $score): bool
+    {
+        $stmt = $this->conn->prepare("UPDATE users SET reputation_score = ? WHERE id = ?");
+        $stmt->bind_param("ii", $score, $id);
+        return $stmt->execute();
+    }
+
+    public function deleteUser(int $id): bool
+    {
+        $stmt = $this->conn->prepare("DELETE FROM users WHERE id = ? AND role != 'admin'");
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
     }
 
     // Đổi trạng thái: 'active' | 'blocked'. Khi mở khóa có thể khôi phục điểm uy tín.

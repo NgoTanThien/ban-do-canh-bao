@@ -322,6 +322,17 @@ $isAdminRoute = (isset($_GET['route']) && $_GET['route'] === 'admin_login') || i
             </div>
 
             <!-- Liên kết điều hướng bên dưới -->
+            
+            <!-- Nút chuyển sang Cổng Quản Trị Viên -->
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed #e2e8f0; width: 100%; text-align: center;">
+                <button type="button" onclick="toggleAdminLogin(true)" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 9999px; padding: 8px 18px; font-size: 13px; font-weight: 700; color: #0f172a; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    <span>Cổng Quản trị viên (Admin) &rarr;</span>
+                </button>
+            </div>
+
             <div class="auth-nav-links">
                 <div>
                     Bạn chưa có tài khoản? <a href="index.php?route=register">Đăng ký</a>
@@ -397,6 +408,19 @@ $isAdminRoute = (isset($_GET['route']) && $_GET['route'] === 'admin_login') || i
                 <p style="font-size: 13px; color: #64748b; margin-top: 8px;">
                     Dành riêng cho Quản trị viên quản lý bản đồ giao thông và người dùng.
                 </p>
+            </div>
+
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 12.5px; color: #1e40af; display: flex; align-items: flex-start; gap: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <div style="flex:1;">
+                    <strong>Thông tin đăng nhập Admin:</strong><br>
+                    Tài khoản: <code style="background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:700;">admin</code> hoặc <code style="background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:700;">admin_super</code><br>
+                    Mật khẩu: <code style="background:#dbeafe; padding:1px 5px; border-radius:4px; font-weight:700;">admin123</code>
+                    <button type="button" onclick="fillAdminCredentials()" style="background:#2563eb; color:white; border:none; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700; margin-left:6px; cursor:pointer;">Tự động điền</button>
+                </div>
             </div>
 
             <form onsubmit="handleAdminLoginSubmit(event)">
@@ -677,6 +701,14 @@ $isAdminRoute = (isset($_GET['route']) && $_GET['route'] === 'admin_login') || i
             }
         }
 
+        
+        function fillAdminCredentials() {
+            const acc = document.getElementById('adminAccount');
+            const pass = document.getElementById('adminPassword');
+            if (acc) acc.value = 'admin';
+            if (pass) pass.value = 'admin123';
+        }
+    
         // --- ĐĂNG NHẬP DÀNH CHO ADMIN ---
         async function handleAdminLoginSubmit(e) {
             e.preventDefault();

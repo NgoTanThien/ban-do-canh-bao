@@ -516,20 +516,35 @@ class AuthController {
      */
     public function logout(): array
     {
+        $currentUid = !empty($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+        if ($currentUid > 0) {
+            $this->users->deleteTokensByUserId($currentUid, 'remember_me');
+        }
+
         if (!empty($_COOKIE['remember_me'])) {
             $parts = explode(':', $_COOKIE['remember_me'], 2);
             if (count($parts) === 2) {
                 $rawToken = $parts[1];
                 $this->users->deleteUserToken($rawToken, 'remember_me');
             }
-            @setcookie('remember_me', '', time() - 3600, '/');
-            unset($_COOKIE['remember_me']);
         }
 
+        // Xóa cookie remember_me trên mọi chuẩn trình duyệt
+        @setcookie('remember_me', '', time() - 3600, '/');
+        @setcookie('remember_me', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+        unset($_COOKIE['remember_me']);
+
+        // Xóa sạch session
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $p = session_get_cookie_params();
             @setcookie(session_name(), '', time() - 3600, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+            @setcookie(session_name(), '', time() - 3600, '/');
         }
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_destroy();

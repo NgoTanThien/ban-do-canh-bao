@@ -2,23 +2,85 @@
 // File: services/Mailer.php
 // Quản lý việc gửi email thông báo mã OTP và Link đặt lại mật khẩu
 
+// Nạp cấu hình SMTP
+if (file_exists(__DIR__ . '/../config/mail.php')) {
+    require_once __DIR__ . '/../config/mail.php';
+}
+
+// Nạp thư viện PHPMailer nếu có
+if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+    if (file_exists(__DIR__ . '/../libs/PHPMailer/src/PHPMailer.php')) {
+        require_once __DIR__ . '/../libs/PHPMailer/src/Exception.php';
+        require_once __DIR__ . '/../libs/PHPMailer/src/PHPMailer.php';
+        require_once __DIR__ . '/../libs/PHPMailer/src/SMTP.php';
+    } elseif (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        require_once __DIR__ . '/../vendor/autoload.php';
+    }
+}
+
 class Mailer {
     private static $logDir = __DIR__ . '/../storage';
     private static $logFile = __DIR__ . '/../storage/mail_logs.txt';
 
     /**
-     * Gửi email chung
+     * Ghi lại lịch sử email vào storage/mail_logs.txt (dùng cho localhost)
      */
-    public static function send(string $toEmail, string $subject, string $htmlBody): bool
+    public static function logMail(string $toEmail, string $subject, string $body): void
     {
-        // Đảm bảo thư mục lưu trữ log tồn tại
         if (!is_dir(self::$logDir)) {
             @mkdir(self::$logDir, 0777, true);
         }
+        $plainText = strip_tags(str_replace(['<br>', '<br/>', '</p>', '</div>'], "\n", $body));
+        $logEntry = sprintf(
+            "[%s] To: %s | Subject: %s\n%s\n----------------------------------------\n",
+            date('Y-m-d H:i:s'),
+            $toEmail,
+            $subject,
+            trim($plainText)
+        );
+        @file_put_contents(self::$logFile, $logEntry, FILE_APPEND);
+    }
 
-        // Tiêu đề email UTF-8 chuẩn
+    /**
+     * Gửi email chung (hỗ trợ PHPMailer SMTP và fallback mail_logs)
+     */
+    public static function send(string $toEmail, string $subject, string $htmlBody): bool
+    {
+        // 1. Luôn ghi log để dễ dàng kiểm tra trên Localhost
+        self::logMail($toEmail, $subject, $htmlBody);
+
+        // 2. Nếu đã cấu hình PHPMailer và thông tin SMTP thực tế (khác placeholder)
+        if (class_exists('PHPMailer\PHPMailer\PHPMailer') && defined('SMTP_USERNAME') && SMTP_USERNAME !== 'your_system_email@gmail.com') {
+            try {
+                $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host       = defined('SMTP_HOST') ? SMTP_HOST : 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = SMTP_USERNAME;
+                $mail->Password   = defined('SMTP_PASSWORD') ? SMTP_PASSWORD : '';
+                $mail->SMTPSecure = (defined('SMTP_SECURE') && SMTP_SECURE === 'ssl') 
+                    ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS 
+                    : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = defined('SMTP_PORT') ? SMTP_PORT : 587;
+
+                $fromEmail = defined('SMTP_FROM_EMAIL') ? SMTP_FROM_EMAIL : 'no-reply@trafficmap.vn';
+                $fromName  = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : 'Traffic Map System';
+                $mail->setFrom($fromEmail, $fromName);
+                $mail->addAddress($toEmail);
+                $mail->isHTML(true);
+                $mail->CharSet = 'UTF-8';
+                $mail->Subject = $subject;
+                $mail->Body    = $htmlBody;
+
+                return $mail->send();
+            } catch (\Throwable $e) {
+                error_log("PHPMailer SMTP Error: " . $e->getMessage());
+                // Fallback xuống hàm mail() bên dưới
+            }
+        }
+
+        // 3. Fallback gửi mail bằng hàm mail() nội tại của PHP
         $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-
         $headers = [
             'MIME-Version: 1.0',
             'Content-type: text/html; charset=UTF-8',
@@ -26,19 +88,50 @@ class Mailer {
             'Reply-To: no-reply@trafficmap.vn',
             'X-Mailer: PHP/' . phpversion()
         ];
-
-        // Ghi lại log để thuận tiện kiểm tra trên localhost/XAMPP
-        $logEntry = sprintf(
-            "[%s] To: %s | Subject: %s\n%s\n----------------------------------------\n",
-            date('Y-m-d H:i:s'),
-            $toEmail,
-            $subject,
-            strip_tags(str_replace(['<br>', '<br/>', '</p>', '</div>'], "\n", $htmlBody))
-        );
-        @file_put_contents(self::$logFile, $logEntry, FILE_APPEND);
-
-        // Gửi mail bằng hàm nội tại của PHP (suppress warning nếu SMTP localhost chưa bật)
         return @mail($toEmail, $encodedSubject, $htmlBody, implode("\r\n", $headers));
+    }
+
+    /**
+     * Hàm gửi OTP quên mật khẩu (theo chuẩn PHPMailer / Gmail SMTP)
+     */
+    public static function sendOtpMail(string $toEmail, string $otpCode): bool
+    {
+        $subject = "[TrafficMap] Ma xac thuc quen mat khau";
+        $content = "Ma OTP cua ban la: " . $otpCode . ". Ma co hieu luc trong 15 phut.";
+
+        // Nếu có PHPMailer và đã điền SMTP thực tế
+        if (class_exists('PHPMailer\PHPMailer\PHPMailer') && defined('SMTP_USERNAME') && SMTP_USERNAME !== 'your_system_email@gmail.com') {
+            try {
+                $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host       = defined('SMTP_HOST') ? SMTP_HOST : 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = SMTP_USERNAME;
+                $mail->Password   = defined('SMTP_PASSWORD') ? SMTP_PASSWORD : '';
+                $mail->SMTPSecure = (defined('SMTP_SECURE') && SMTP_SECURE === 'ssl') 
+                    ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS 
+                    : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = defined('SMTP_PORT') ? SMTP_PORT : 587;
+
+                $fromEmail = defined('SMTP_FROM_EMAIL') ? SMTP_FROM_EMAIL : 'no-reply@trafficmap.vn';
+                $fromName  = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : 'Traffic Map System';
+                $mail->setFrom($fromEmail, $fromName);
+                $mail->addAddress($toEmail);
+                $mail->CharSet = 'UTF-8';
+                $mail->Subject = $subject;
+                $mail->Body    = $content;
+
+                return $mail->send();
+            } catch (\Throwable $e) {
+                // Fallback ghi log nếu chưa kết nối được mạng/SMTP trên Localhost
+                self::logMail($toEmail, $subject, $content);
+                return false;
+            }
+        }
+
+        // Fallback ghi log nếu chưa cấu hình SMTP thực tế
+        self::logMail($toEmail, $subject, $content);
+        return true;
     }
 
     /**
@@ -73,7 +166,6 @@ class Mailer {
      */
     public static function sendResetPasswordEmail(string $toEmail, string $fullName, string $resetToken, string $otpCode, int $expiresMinutes = 15): bool
     {
-        // Tạo link reset URL
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         $baseDir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/ban-do-canh-bao'), '/\\');
@@ -114,3 +206,9 @@ class Mailer {
     }
 }
 
+// Hàm global tương thích với đoạn code mẫu
+if (!function_exists('sendOtpMail')) {
+    function sendOtpMail($toEmail, $otpCode) {
+        return Mailer::sendOtpMail($toEmail, $otpCode);
+    }
+}

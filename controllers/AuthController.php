@@ -107,8 +107,7 @@ class AuthController {
             'message' => 'Mã xác thực OTP đã được gửi đến email ' . htmlspecialchars($email) . '. Vui lòng kiểm tra hòm thư!',
             'data' => [
                 'email'              => $email,
-                'expires_in_minutes' => 15,
-                'debug_otp'          => $otpCode // Hiển thị mã để test nhanh trên localhost
+                'expires_in_minutes' => 15
             ]
         ];
     }
@@ -391,9 +390,9 @@ class AuthController {
      */
     public function forgotPassword(array $in): array
     {
-        $input = trim($in['email'] ?? $in['account'] ?? $in['username'] ?? '');
+        $input = trim($in['email'] ?? $in['account'] ?? $in['username'] ?? $in['phone'] ?? '');
         if ($input === '') {
-            return $this->fail('Vui lòng nhập địa chỉ email hoặc tên đăng nhập!', 422);
+            return $this->fail('Vui lòng nhập email, tên đăng nhập hoặc số điện thoại!', 422);
         }
 
         $user = null;
@@ -412,6 +411,7 @@ class AuthController {
         }
 
         $email = $user['email'];
+        $phone = $user['phone'] ?? null;
 
         // Tạo Reset Token (chuỗi ngẫu nhiên an toàn 64 ký tự)
         $resetToken = bin2hex(random_bytes(32));
@@ -423,20 +423,33 @@ class AuthController {
         $this->users->deleteTokensByUserId((int)$user['id'], 'reset_password');
         $this->users->createUserToken((int)$user['id'], $resetToken, 'reset_password', $fifteenMinutes);
 
-        // Lưu OTP vào bảng email_otps
-        $this->users->createEmailOtp($email, $otpCode, 'reset_password', ['user_id' => (int)$user['id']], 15);
+        // Lưu OTP vào bảng email_otps kèm user_id và phone trong payload JSON
+        $this->users->createEmailOtp($email, $otpCode, 'reset_password', [
+            'user_id' => (int)$user['id'],
+            'phone'   => $phone
+        ], 15);
 
-        // Gửi email thực tế chứa OTP và Link đặt lại mật khẩu
+        // 1. Gửi qua Email (Mailer / SMTP)
         Mailer::sendResetPasswordEmail($email, $user['full_name'] ?? $user['username'], $resetToken, $otpCode, 15);
+
+        // 2. Gửi qua tin nhắn SMS nếu tài khoản có số điện thoại
+        $hasPhone = !empty($phone);
+        if ($hasPhone) {
+            if (file_exists(__DIR__ . '/../services/SmsService.php')) {
+                require_once __DIR__ . '/../services/SmsService.php';
+                SmsService::sendOtpSms($phone, $otpCode);
+            }
+        }
 
         return [
             'ok' => true,
-            'message' => 'Mã OTP đặt lại mật khẩu đã được gửi đến email của bạn!',
+            'message' => $hasPhone 
+                ? 'Mã OTP đặt lại mật khẩu đã được gửi đến email và số điện thoại của bạn!' 
+                : 'Mã OTP đặt lại mật khẩu đã được gửi đến email của bạn!',
             'data' => [
                 'email'              => $email,
-                'expires_in_minutes' => 15,
-                'debug_otp'          => $otpCode,     // Hỗ trợ kiểm tra nhanh localhost
-                'debug_token'        => $resetToken  // Hỗ trợ kiểm tra nhanh localhost
+                'has_phone'          => $hasPhone,
+                'expires_in_minutes' => 15
             ]
         ];
     }
@@ -470,18 +483,32 @@ class AuthController {
             $userId = (int)$user['id'];
             $this->users->deleteUserToken($token, 'reset_password');
         }
-        // Cách 2: Xác thực qua Email + Mã OTP
+        // Cách 2: Xác thực qua Email / SĐT + Mã OTP (Khớp cấu trúc email_otps)
         elseif ($email !== '' && $otp !== '') {
-            $otpRecord = $this->users->getValidEmailOtp($email, 'reset_password', $otp);
+            $targetEmail = $email;
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $u = $this->users->findByAccount($email);
+                if ($u && !empty($u['email'])) {
+                    $targetEmail = $u['email'];
+                }
+            }
+
+            $otpRecord = $this->users->getValidEmailOtp($targetEmail, 'reset_password', $otp);
             if (!$otpRecord) {
-                return $this->fail('Mã OTP không hợp lệ hoặc đã hết thời hạn 15 phút!', 422);
+                return $this->fail('Mã OTP không đúng hoặc đã hết hạn!', 422);
             }
-            $user = $this->users->findByEmail($email);
-            if (!$user) {
-                return $this->fail('Không tìm thấy tài khoản người dùng!', 404);
+            // Trích xuất user_id trực tiếp từ payload data JSON của bảng email_otps
+            if (!empty($otpRecord['payload']['user_id'])) {
+                $userId = (int)$otpRecord['payload']['user_id'];
+            } else {
+                $user = $this->users->findByEmail($targetEmail);
+                if (!$user) {
+                    return $this->fail('Không tìm thấy tài khoản người dùng!', 404);
+                }
+                $userId = (int)$user['id'];
             }
-            $userId = (int)$user['id'];
-            $this->users->deleteEmailOtps($email, 'reset_password');
+            // Sau khi xác thực xong, xóa bỏ OTP đã dùng
+            $this->users->deleteEmailOtps($targetEmail, 'reset_password');
         } else {
             return $this->fail('Thiếu mã OTP hoặc Token xác thực đặt lại mật khẩu!', 422);
         }

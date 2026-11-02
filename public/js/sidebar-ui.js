@@ -457,7 +457,12 @@ function openSubPanel(title, type, extraData = {}) {
                         </div>
                         <div>
                             <label style="font-size:13px; font-weight:700; color:#292929; margin-bottom:4px; display:block;">Mật khẩu</label>
-                            <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" class="f8-form-input" required autocomplete="current-password">
+                            <div style="position:relative; width:100%;">
+                                <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" class="f8-form-input" required autocomplete="current-password" style="padding-right:42px;">
+                                <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                         </div>
 
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; margin:2px 0;">
@@ -518,11 +523,21 @@ function openSubPanel(title, type, extraData = {}) {
                         </div>
                         <div>
                             <label style="font-size:12.5px; font-weight:700; color:#292929; margin-bottom:3px; display:block;">Mật khẩu <span style="color:#f33a58;">*</span></label>
-                            <input type="password" id="regPassword" class="f8-form-input" placeholder="Ít nhất 6 ký tự" required minlength="6" autocomplete="new-password">
+                            <div style="position:relative; width:100%;">
+                                <input type="password" id="regPassword" class="f8-form-input" placeholder="Ít nhất 6 ký tự" required minlength="6" autocomplete="new-password" style="padding-right:42px;">
+                                <button type="button" onclick="togglePasswordVisibility('regPassword', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label style="font-size:12.5px; font-weight:700; color:#292929; margin-bottom:3px; display:block;">Xác nhận mật khẩu <span style="color:#f33a58;">*</span></label>
-                            <input type="password" id="regConfirmPassword" class="f8-form-input" placeholder="Nhập lại mật khẩu" required minlength="6" autocomplete="new-password">
+                            <div style="position:relative; width:100%;">
+                                <input type="password" id="regConfirmPassword" class="f8-form-input" placeholder="Nhập lại mật khẩu" required minlength="6" autocomplete="new-password" style="padding-right:42px;">
+                                <button type="button" onclick="togglePasswordVisibility('regConfirmPassword', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                         </div>
 
                         <div style="display:flex; align-items:flex-start; gap:6px; margin:4px 0 8px; font-size:12px; color:#4e5867;">
@@ -550,7 +565,6 @@ function openSubPanel(title, type, extraData = {}) {
     // PANEL: XÁC THỰC MÃ OTP ĐĂNG KÝ
     else if (type === 'verify_otp') {
         const targetEmail = extraData.email || '';
-        const debugOtp = extraData.debugOtp || '';
         contentDiv.innerHTML = `
             <div style="padding: 8px 0; text-align:center;">
                 <div style="width:56px; height:56px; background:#0284c7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:white; font-size:1.8rem;">
@@ -562,11 +576,7 @@ function openSubPanel(title, type, extraData = {}) {
                     <strong style="color:#60a5fa;">${targetEmail}</strong>
                 </p>
 
-                ${debugOtp ? `
-                    <div style="background:#1e3a5f; border:1px dashed #3b82f6; color:#93c5fd; padding:10px 14px; border-radius:8px; font-size:0.83rem; margin-bottom:16px; text-align:left;">
-                        💡 <b>Môi trường thử nghiệm:</b> Mã OTP của bạn là: <span style="font-size:1.15rem; font-weight:bold; color:white; letter-spacing:2px;">${debugOtp}</span>
-                    </div>
-                ` : ''}
+
 
                 <form onsubmit="handleVerifyRegisterOtp(event)" style="display:flex; flex-direction:column; gap:14px;">
                     <input type="hidden" id="otpTargetEmail" value="${targetEmail}">
@@ -616,9 +626,7 @@ function openSubPanel(title, type, extraData = {}) {
                     Nhập email hoặc tên đăng nhập để nhận mã đặt lại mật khẩu.
                 </p>
 
-                <div id="f8ForgotDebugBox" style="display:none; background:#f0fdfa; border:1px dashed #1dbfaf; color:#0f766e; padding:8px 12px; border-radius:10px; font-size:12.5px; margin-bottom:12px;">
-                    💡 <b>Môi trường thử nghiệm:</b> Mã OTP là: <span id="f8DebugOtpCode" style="font-weight:bold; letter-spacing:2px; color:#111;"></span>
-                </div>
+                
 
                 <form onsubmit="handleF8ResetPasswordSubmit(event)" style="display:flex; flex-direction:column;">
                     <label style="font-size:14px; font-weight:700; color:#292929; margin-bottom:8px; text-align:left;">Tên đăng nhập</label>
@@ -633,8 +641,18 @@ function openSubPanel(title, type, extraData = {}) {
                     </div>
 
                     <div id="f8NewPassSection" style="display:none; margin-top:12px; flex-direction:column; gap:10px;">
-                        <input type="password" id="resetNewPassword" class="f8-pill-input" placeholder="Mật khẩu mới (ít nhất 6 ký tự)" minlength="6">
-                        <input type="password" id="resetConfirmPassword" class="f8-pill-input" placeholder="Xác nhận mật khẩu mới" minlength="6">
+                        <div style="position:relative; width:100%;">
+                            <input type="password" id="resetNewPassword" class="f8-pill-input" placeholder="Mật khẩu mới (ít nhất 6 ký tự)" minlength="6" style="padding-right:42px;">
+                            <button type="button" onclick="togglePasswordVisibility('resetNewPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                        <div style="position:relative; width:100%;">
+                            <input type="password" id="resetConfirmPassword" class="f8-pill-input" placeholder="Xác nhận mật khẩu mới" minlength="6" style="padding-right:42px;">
+                            <button type="button" onclick="togglePasswordVisibility('resetConfirmPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
                     </div>
 
                     <button type="submit" id="btnForgotSubmit" class="f8-btn-submit-reset">
@@ -652,8 +670,7 @@ function openSubPanel(title, type, extraData = {}) {
     else if (type === 'reset_password') {
         const token = extraData.token || '';
         const email = extraData.email || '';
-        const debugOtp = extraData.debugOtp || '';
-        const hasToken = token.length > 0;
+                const hasToken = token.length > 0;
 
         contentDiv.innerHTML = `
             <div style="padding: 8px 0;">
@@ -664,11 +681,7 @@ function openSubPanel(title, type, extraData = {}) {
                         : 'Nhập email, mã OTP nhận được và mật khẩu mới để hoàn tất (hiệu lực 15 phút).'}
                 </p>
 
-                ${debugOtp ? `
-                    <div style="background:#1e3a5f; border:1px dashed #3b82f6; color:#93c5fd; padding:10px 14px; border-radius:8px; font-size:0.83rem; margin-bottom:16px;">
-                        💡 <b>Môi trường thử nghiệm:</b> Mã OTP của bạn là: <span style="font-size:1.15rem; font-weight:bold; color:white; letter-spacing:2px;">${debugOtp}</span>
-                    </div>
-                ` : ''}
+
 
                 <form onsubmit="handleResetPassword(event)" style="display:flex; flex-direction:column; gap:12px;">
                     <input type="hidden" id="resetToken" value="${token}">
@@ -686,11 +699,21 @@ function openSubPanel(title, type, extraData = {}) {
 
                     <div>
                         <label style="color:#a1a1aa; font-size:0.82rem; margin-bottom:4px; display:block;">Mật khẩu mới</label>
-                        <input type="password" id="resetNewPassword" placeholder="Ít nhất 6 ký tự" class="form-input" required minlength="6">
+                        <div style="position:relative; width:100%;">
+                            <input type="password" id="resetNewPassword" placeholder="Ít nhất 6 ký tự" class="form-input" required minlength="6" style="padding-right:42px;">
+                            <button type="button" onclick="togglePasswordVisibility('resetNewPassword', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#94a3b8; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label style="color:#a1a1aa; font-size:0.82rem; margin-bottom:4px; display:block;">Xác nhận mật khẩu mới</label>
-                        <input type="password" id="resetConfirmPassword" placeholder="Nhập lại mật khẩu mới" class="form-input" required minlength="6">
+                        <div style="position:relative; width:100%;">
+                            <input type="password" id="resetConfirmPassword" placeholder="Nhập lại mật khẩu mới" class="form-input" required minlength="6" style="padding-right:42px;">
+                            <button type="button" onclick="togglePasswordVisibility('resetConfirmPassword', this)" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#94a3b8; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
                     </div>
 
                     <button type="submit" id="btnResetSubmit" style="width:100%; background:#10b981; color:white; border:none; padding:12px; border-radius:10px; font-weight:bold; cursor:pointer; font-size:0.95rem; margin-top:6px;">
@@ -891,3 +914,18 @@ function openSubPanel(title, type, extraData = {}) {
         `;
     }
 }
+
+// Hàm bật/tắt hiển thị mật khẩu dùng chung
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    if (btn) {
+        btn.setAttribute('aria-label', isPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+        btn.innerHTML = isPassword
+            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    }
+}
+window.togglePasswordVisibility = togglePasswordVisibility;

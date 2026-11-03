@@ -48,21 +48,6 @@
             </div>
 
             <div class="sidebar-divider"></div>
-
-            <div class="sidebar-links">
-                <a href="#" onclick="openLayerSwitcherModal(); toggleSidebar(); return false;">
-                    <i class="ph ph-stack"></i> Quản lý lớp bản đồ GIS
-                </a>
-                <a href="#" onclick="openSubPanel('Góp ý xây dựng', 'feedback'); return false;">
-                    <i class="ph ph-chat-teardrop-dots"></i> Góp ý phát triển
-                </a>
-                <a href="#" onclick="openSubPanel('Hướng dẫn sử dụng', 'guide'); return false;">
-                    <i class="ph ph-question"></i> Hướng dẫn & An toàn
-                </a>
-                <a href="#" onclick="openSubPanel('Nhật ký cập nhật', 'changelog'); return false;">
-                    <i class="ph ph-sparkle"></i> Phiên bản UrbanGuard 2.0
-                </a>
-            </div>
         </div>
 
         <!-- Phần thông tin tài khoản luôn ghim cố định ở chân Sidebar -->

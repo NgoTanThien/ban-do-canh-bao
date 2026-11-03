@@ -104,9 +104,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
             <a id="tab-btn-reports" onclick="switchTab('reports')">
                 <i class="ph-bold ph-warning-circle"></i> Quản lý sự cố & Xuất Excel
             </a>
-            <a id="tab-btn-sos" onclick="switchTab('sos')">
-                <i class="ph-bold ph-first-aid"></i> Điều phối Cứu hộ SOS
-            </a>
             <div style="height: 1px; background: #334155; margin: 12px 0;"></div>
             <a href="index.php?route=home">
                 <i class="ph-bold ph-map-pin"></i> Xem Bản đồ giao thông
@@ -156,13 +153,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
                         <div class="number" id="activeReportsCount">--</div>
                     </div>
                     <div class="stat-icon"><i class="ph-bold ph-warning"></i></div>
-                </div>
-                <div class="stat-card red">
-                    <div class="stat-info">
-                        <h4>Yêu cầu Cứu hộ SOS</h4>
-                        <div class="number" id="sosRequestsCount">--</div>
-                    </div>
-                    <div class="stat-icon"><i class="ph-bold ph-first-aid"></i></div>
                 </div>
             </div>
 
@@ -585,10 +575,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
         Api.adminReports('dang_dien_ra').then(r => {
             const list = (r && r.data) ? r.data : (Array.isArray(r) ? r : []);
             document.getElementById('activeReportsCount').innerText = list.length;
-        }).catch(() => {});
-        Api.adminSos().then(s => {
-            const list = (s && s.data) ? s.data : (Array.isArray(s) ? s : []);
-            document.getElementById('sosRequestsCount').innerText = list.length;
         }).catch(() => {});
     </script>
 </body>

@@ -476,14 +476,15 @@ function addWarningZoneCluster(cluster, zoneIdx) {
 
 // Render danh sách Markers & Vùng Cảnh Báo lên bản đồ
 // Render các Vùng Rốn Ngập Lịch Sử (trong 30 ngày gần nhất) khi trời đang mưa
-function renderHistoricalFloodZones(historyReports, activeClusters = []) {
+// Render các Vùng Rốn Ngập Lịch Sử (trong 30 ngày gần nhất) CHỈ KHI TRỜI ĐANG MƯA (hoặc bật Radar Mưa)
+function renderHistoricalFloodZones(historyReports) {
+    const activeZones = [];
     if (!window.isCurrentlyRaining || !Array.isArray(historyReports) || historyReports.length === 0) {
-        return 0;
+        return activeZones;
     }
 
-    // Gom cụm lịch sử ngập trong bán kính 150m bằng chính thuật toán chống nối đuôi
+    // Gom cụm lịch sử ngập trong bán kính 150m
     const historyClusters = groupReportsIntoZones(historyReports, WARNING_ZONE_RADIUS);
-    let historyZoneCount = 0;
 
     historyClusters.forEach((cluster) => {
         // Chỉ những khu vực có > 5 báo cáo ngập (>= 6) trong 30 ngày qua mới được nhớ là "Rốn ngập"
@@ -506,23 +507,14 @@ function renderHistoricalFloodZones(historyReports, activeClusters = []) {
         // (tức gần 3 tuần qua không còn ai báo ngập), khả năng đường đã sửa xong -> bỏ qua
         if (minDaysAgo > 20 && minDaysAgo !== 999) return;
 
-        // Không vẽ đè nếu vị trí này đang có sẵn 1 Vùng Cảnh Báo Trực Tiếp (> 5 điểm đang diễn ra)
-        const isOverlappingActiveZone = activeClusters.some(actCluster => {
-            if (actCluster.length <= 5) return false;
-            const aLat = actCluster.reduce((s, item) => s + parseFloat(item.latitude), 0) / actCluster.length;
-            const aLng = actCluster.reduce((s, item) => s + parseFloat(item.longitude), 0) / actCluster.length;
-            return getDistanceInMeters(centerLat, centerLng, aLat, aLng) < 120;
-        });
-        if (isOverlappingActiveZone) return;
+        activeZones.push({ lat: centerLat, lng: centerLng, radius: WARNING_ZONE_RADIUS });
 
-        historyZoneCount++;
-
-        // 1. Vẽ Vòng tròn Vùng Rốn Ngập Dự Báo (Nét đứt màu xanh lam đậm)
+        // 1. Vẽ Vòng tròn Vùng Rốn Ngập Dự Báo (Khi trời mưa)
         const zoneCircle = L.circle([centerLat, centerLng], {
             radius: WARNING_ZONE_RADIUS,
-            color: '#0369a1',
-            fillColor: '#0ea5e9',
-            fillOpacity: 0.25,
+            color: '#0284c7',
+            fillColor: '#38bdf8',
+            fillOpacity: 0.28,
             weight: 2.5,
             dashArray: '8, 6',
             className: 'warning-zone-circle-flood'
@@ -553,7 +545,7 @@ function renderHistoricalFloodZones(historyReports, activeClusters = []) {
             <div style="font-size: 0.9rem; line-height: 1.45; min-width: 250px; max-width: 285px;">
                 <div style="margin-bottom: 6px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
                     <span style="background: rgba(14, 165, 233, 0.22); color: #38bdf8; padding: 3px 9px; border-radius: 6px; font-weight: 700; font-size: 0.74rem;">
-                        🌧️ CẢNH BÁO RỐN NGẬP LỊCH SỬ
+                        🌧️ CẢNH BÁO RỐN NGẬP KHI MƯA
                     </span>
                     <span style="color:#a1a1aa; font-size:0.75rem;">Bán kính ${WARNING_ZONE_RADIUS}m</span>
                 </div>
@@ -564,7 +556,7 @@ function renderHistoricalFloodZones(historyReports, activeClusters = []) {
                     Khu vực này đã ghi nhận <b style="color:#38bdf8;">${cluster.length} lượt báo cáo ngập</b> trong <b>30 ngày qua</b> (lần gần nhất: <b>${lastTimeText}</b>).
                 </p>
                 <div style="padding: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; color: #fca5a5; font-size: 0.79rem;">
-                    ⚠️ <b>Dự báo tự động:</b> Hiện đang có mưa, khu vực này có nguy cơ tái ngập rất cao dù chưa cần người dân báo mới. Hãy chủ động tránh tuyến đường này!
+                    ⚠️ <b>Dự báo tự động:</b> Hiện đang có mưa, khu vực này có nguy cơ ngập rất cao dựa trên lịch sử đã ghi nhớ. Hãy chủ động tránh tuyến đường này!
                 </div>
             </div>
         `;
@@ -576,82 +568,19 @@ function renderHistoricalFloodZones(historyReports, activeClusters = []) {
         markersLayer.addLayer(centerMarker);
     });
 
-    return historyZoneCount;
+    return activeZones;
 }
 
-// Render danh sách Markers & Vùng Cảnh Báo lên bản đồ
-function renderMarkers(reports) {
-    markersLayer.clearLayers();
-
-    // Lọc theo bộ lọc hiện tại
-    let filteredReports = reports;
-    if (window.currentFilter === 'ngap_nuoc') {
-        filteredReports = reports.filter(r => (r.type === 'ngap_nuoc' || r.report_type === 'flood'));
-    } else if (window.currentFilter === 'ket_xe') {
-        filteredReports = reports.filter(r => (r.type === 'ket_xe' || r.report_type === 'traffic'));
-    }
-
-    const statusText = document.getElementById('status-text');
-    const statusDot = document.getElementById('status-dot');
-
-    // Gom nhóm các điểm đang diễn ra gần nhau trong bán kính 150m
-    const clusters = groupReportsIntoZones(filteredReports, WARNING_ZONE_RADIUS);
-    let zoneCount = 0;
-
-    clusters.forEach((cluster, idx) => {
-        // Khi có nhiều hơn 5 cảnh báo (> 5, tức từ 6 cảnh báo trở lên) ở cùng khu vực -> chuyển thành Vùng vòng tròn cảnh báo
-        if (cluster.length > 5) {
-            zoneCount++;
-            addWarningZoneCluster(cluster, idx);
-        } else {
-            cluster.forEach(r => addSingleReportMarker(r));
-        }
-    });
-
-    // Tự động hiển thị thêm Vùng Rốn Ngập Lịch Sử (30 ngày) nếu trời đang mưa
-    let historyZoneCount = 0;
-    if (window.currentFilter === 'all' || window.currentFilter === 'ngap_nuoc') {
-        historyZoneCount = renderHistoricalFloodZones(window.floodHistoryReports || [], clusters);
-    }
-
-    const totalZones = zoneCount + historyZoneCount;
-
-    if (filteredReports.length > 0 || historyZoneCount > 0) {
-        if (statusText) {
-            statusText.innerText = totalZones > 0
-                ? `Đang có ${filteredReports.length} cảnh báo (${totalZones} vùng nguy hiểm)`
-                : `Đang có ${filteredReports.length} điểm cảnh báo`;
-        }
-        if (statusDot) {
-            statusDot.className = 'pulse-dot orange';
-        }
-    } else {
-        if (statusText) statusText.innerText = `Hiện tại đường thông thoáng`;
-        if (statusDot) {
-            statusDot.className = 'pulse-dot green';
-        }
-    }
-}
-
-// 8. Quản lý Bộ lọc sự cố
-function toggleFilterMenu(e) {
-    if (e) e.stopPropagation();
-    const menu = document.getElementById('filterMenu');
-    if (menu) {
-        menu.classList.toggle('show');
-    }
-}
-
-// Render các Vùng Điểm Đen Kẹt Xe Lịch Sử (trong 90 ngày gần nhất) khi vào Giờ Cao Điểm
-function renderHistoricalTrafficZones(historyReports, activeClusters = []) {
+// Render các Vùng Điểm Đen Kẹt Xe Lịch Sử (trong 90 ngày gần nhất) CHỈ KHI VÀO GIỜ CAO ĐIỂM
+function renderHistoricalTrafficZones(historyReports) {
+    const activeZones = [];
     const rushStatus = getRushHourStatus();
     if (!rushStatus.isRush || !Array.isArray(historyReports) || historyReports.length === 0) {
-        return 0;
+        return activeZones;
     }
 
     // Gom cụm lịch sử kẹt xe trong bán kính 150m
     const historyClusters = groupReportsIntoZones(historyReports, WARNING_ZONE_RADIUS);
-    let trafficZoneCount = 0;
 
     historyClusters.forEach((cluster) => {
         // Chỉ những khu vực có > 5 báo cáo kẹt xe (>= 6) trong 90 ngày qua mới được nhớ là "Điểm đen kẹt xe"
@@ -674,16 +603,7 @@ function renderHistoricalTrafficZones(historyReports, activeClusters = []) {
         // khả năng đường đã được mở rộng / phân luồng lại -> bỏ qua không cảnh báo nữa
         if (minDaysAgo > 45 && minDaysAgo !== 999) return;
 
-        // Không vẽ đè nếu vị trí này đang có sẵn 1 Vùng Cảnh Báo Trực Tiếp (> 5 điểm đang diễn ra)
-        const isOverlappingActiveZone = activeClusters.some(actCluster => {
-            if (actCluster.length <= 5) return false;
-            const aLat = actCluster.reduce((s, item) => s + parseFloat(item.latitude), 0) / actCluster.length;
-            const aLng = actCluster.reduce((s, item) => s + parseFloat(item.longitude), 0) / actCluster.length;
-            return getDistanceInMeters(centerLat, centerLng, aLat, aLng) < 120;
-        });
-        if (isOverlappingActiveZone) return;
-
-        trafficZoneCount++;
+        activeZones.push({ lat: centerLat, lng: centerLng, radius: WARNING_ZONE_RADIUS });
 
         // 1. Vẽ Vòng tròn Vùng Điểm Đen Kẹt Xe Giờ Cao Điểm (Nét đứt màu cam đỏ)
         const zoneCircle = L.circle([centerLat, centerLng], {
@@ -744,10 +664,19 @@ function renderHistoricalTrafficZones(historyReports, activeClusters = []) {
         markersLayer.addLayer(centerMarker);
     });
 
-    return trafficZoneCount;
+    return activeZones;
 }
 
-// Render danh sách Markers & Vùng Cảnh Báo lên bản đồ
+// 8. Quản lý Bộ lọc sự cố
+function toggleFilterMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('filterMenu');
+    if (menu) {
+        menu.classList.toggle('show');
+    }
+}
+
+// Render danh sách Markers & Vùng Cảnh Báo Dự Đoán lên bản đồ
 function renderMarkers(reports) {
     markersLayer.clearLayers();
 
@@ -762,33 +691,36 @@ function renderMarkers(reports) {
     const statusText = document.getElementById('status-text');
     const statusDot = document.getElementById('status-dot');
 
-    // Gom nhóm các điểm đang diễn ra gần nhau trong bán kính 150m
-    const clusters = groupReportsIntoZones(filteredReports, WARNING_ZONE_RADIUS);
-    let zoneCount = 0;
+    // 1. CHỈ hiển thị Vùng Rốn Ngập Lịch Sử (30 ngày) khi TRỜI ĐANG MƯA (hoặc bật Radar Mây Mưa)
+    let activeFloodZones = [];
+    if (window.currentFilter === 'all' || window.currentFilter === 'ngap_nuoc') {
+        activeFloodZones = renderHistoricalFloodZones(window.floodHistoryReports || []);
+    }
 
-    clusters.forEach((cluster, idx) => {
-        // Khi có nhiều hơn 5 cảnh báo (> 5, tức từ 6 cảnh báo trở lên) ở cùng khu vực -> chuyển thành Vùng vòng tròn cảnh báo
-        if (cluster.length > 5) {
-            zoneCount++;
-            addWarningZoneCluster(cluster, idx);
-        } else {
-            cluster.forEach(r => addSingleReportMarker(r));
+    // 2. CHỈ hiển thị Vùng Điểm Đen Kẹt Xe (90 ngày) khi ĐANG TRONG GIỜ CAO ĐIỂM
+    let activeTrafficZones = [];
+    if (window.currentFilter === 'all' || window.currentFilter === 'ket_xe') {
+        activeTrafficZones = renderHistoricalTrafficZones(window.trafficHistoryReports || []);
+    }
+
+    // 3. Hiển thị các chấm báo cáo đang diễn ra (ẩn các chấm đã nằm gọn trong Vùng Dự Báo đang bật)
+    filteredReports.forEach(r => {
+        const lat = parseFloat(r.latitude);
+        const lng = parseFloat(r.longitude);
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        const isFlood = (r.type === 'ngap_nuoc' || r.report_type === 'flood');
+        if (isFlood && activeFloodZones.some(z => getDistanceInMeters(lat, lng, z.lat, z.lng) <= z.radius)) {
+            return; // Đã có Vùng Rốn Ngập hiển thị đại diện khi trời mưa
         }
+        if (!isFlood && activeTrafficZones.some(z => getDistanceInMeters(lat, lng, z.lat, z.lng) <= z.radius)) {
+            return; // Đã có Vùng Điểm Đen Kẹt Xe hiển thị đại diện trong giờ cao điểm
+        }
+
+        addSingleReportMarker(r);
     });
 
-    // 1. Tự động hiển thị Vùng Rốn Ngập Lịch Sử (30 ngày) nếu trời đang mưa
-    let historyFloodZoneCount = 0;
-    if (window.currentFilter === 'all' || window.currentFilter === 'ngap_nuoc') {
-        historyFloodZoneCount = renderHistoricalFloodZones(window.floodHistoryReports || [], clusters);
-    }
-
-    // 2. Tự động hiển thị Vùng Điểm Đen Kẹt Xe (90 ngày) nếu đang trong Giờ Cao Điểm
-    let historyTrafficZoneCount = 0;
-    if (window.currentFilter === 'all' || window.currentFilter === 'ket_xe') {
-        historyTrafficZoneCount = renderHistoricalTrafficZones(window.trafficHistoryReports || [], clusters);
-    }
-
-    const totalZones = zoneCount + historyFloodZoneCount + historyTrafficZoneCount;
+    const totalZones = activeFloodZones.length + activeTrafficZones.length;
 
     if (filteredReports.length > 0 || totalZones > 0) {
         if (statusText) {
@@ -806,6 +738,15 @@ function renderMarkers(reports) {
         }
     }
 }
+
+// // 8. Quản lý Bộ lọc sự cố
+// function toggleFilterMenu(e) {
+//     if (e) e.stopPropagation();
+//     const menu = document.getElementById('filterMenu');
+//     if (menu) {
+//         menu.classList.toggle('show');
+//     }
+// }
 
 document.addEventListener('click', function() {
     const menu = document.getElementById('filterMenu');

@@ -68,20 +68,13 @@ class UserModel {
     public function findByAccount(string $account)
     {
         $stmt = $this->conn->prepare(
-            "SELECT * FROM users WHERE username = ? OR email = ? OR (phone IS NOT NULL AND phone != '' AND phone = ?) LIMIT 1"
+            "SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1"
         );
-        $stmt->bind_param("sss", $account, $account, $account);
+        $stmt->bind_param("ss", $account, $account);
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc() ?: null;
     }
 
-    public function findByPhone(string $phone)
-    {
-        $stmt = $this->conn->prepare("SELECT * FROM users WHERE phone = ? LIMIT 1");
-        $stmt->bind_param("s", $phone);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_assoc() ?: null;
-    }
 
     public function findByGoogleId(string $googleId)
     {
@@ -166,11 +159,12 @@ class UserModel {
     }
 
     // Đăng ký tài khoản (hỗ trợ họ tên, sđt)
+        // Đăng ký tài khoản sau khi đã xác thực OTP (đánh dấu is_verified = 1)
     public function registerWithProfile(string $username, string $fullName, string $email, string $password): int
     {
         $hashed = password_hash($password, PASSWORD_BCRYPT);
         $stmt = $this->conn->prepare(
-            "INSERT INTO users(username, full_name, email, password) VALUES (?, ?, ?, ?)"
+            "INSERT INTO users(username, full_name, email, password, is_verified) VALUES (?, ?, ?, ?, 1)"
         );
         $stmt->bind_param("ssss", $username, $fullName, $email, $hashed);
         $stmt->execute();
@@ -372,10 +366,10 @@ class UserModel {
 
     // =========================================================================
 
-    public function updateProfile(int $userId, ?string $fullName, ?string $phone): bool
+    public function updateProfile(int $userId, ?string $fullName): bool
     {
-        $stmt = $this->conn->prepare("UPDATE users SET full_name = ?, phone = ? WHERE id = ?");
-        $stmt->bind_param("ssi", $fullName, $phone, $userId);
+        $stmt = $this->conn->prepare("UPDATE users SET full_name = ? WHERE id = ?");
+        $stmt->bind_param("si", $fullName, $userId);
         return $stmt->execute();
     }
 }

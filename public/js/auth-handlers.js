@@ -105,7 +105,6 @@ async function handleAuthRegister(e) {
         openSubPanel('Xác thực địa chỉ Email', 'verify_otp', {
             email: email,
             fullName: fullName,
-            debugOtp: (res && res.debug_otp) ? res.debug_otp : null,
             regData: payload
         });
     } catch (err) {
@@ -145,13 +144,10 @@ async function handleResendRegisterOtp(email) {
         const data = (window.currentSubData && window.currentSubData.regData) || { email: email };
         const res = await Api.register(data);
         showToast("Đã gửi lại mã OTP mới đến email!", true);
-        if (res && res.debug_otp) {
-            openSubPanel('Xác thực địa chỉ Email', 'verify_otp', {
-                email: email,
-                debugOtp: res.debug_otp,
-                regData: data
-            });
-        }
+        openSubPanel('Xác thực địa chỉ Email', 'verify_otp', {
+            email: email,
+            regData: data
+        });
     } catch (err) {
         showToast(err.message || "Gửi lại OTP thất bại!", false);
     }
@@ -174,9 +170,7 @@ async function handleForgotPassword(e) {
         const res = await Api.forgotPassword(email);
         showToast("Đã gửi liên kết và mã OTP đặt lại mật khẩu!", true);
         openSubPanel('Đặt lại mật khẩu', 'reset_password', {
-            email: email,
-            token: res ? res.debug_token : '',
-            debugOtp: res ? res.debug_otp : ''
+            email: email
         });
     } catch (err) {
         showToast(err.message || "Không thể gửi yêu cầu đặt lại mật khẩu!", false);
@@ -251,14 +245,7 @@ async function sendF8ForgotCode() {
         const codeInput = document.getElementById('resetOtpCode');
         if (codeInput) codeInput.focus();
 
-        if (res && res.debug_otp) {
-            const debugBox = document.getElementById('f8ForgotDebugBox');
-            const debugText = document.getElementById('f8DebugOtpCode');
-            if (debugBox && debugText) {
-                debugBox.style.display = 'block';
-                debugText.innerText = res.debug_otp;
-            }
-        }
+
 
         btn.innerText = 'Gửi lại';
         btn.disabled = false;

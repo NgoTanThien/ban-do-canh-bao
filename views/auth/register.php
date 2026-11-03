@@ -296,12 +296,22 @@ require_once __DIR__ . '/../../config/google.php';
 
                 <div style="margin-bottom: 12px;">
                     <label style="display:block; font-size:13px; font-weight:700; color:#292929; margin-bottom:5px;">Mật khẩu <span style="color:#f33a58;">*</span></label>
-                    <input type="password" id="regPassword" class="form-input-pill" placeholder="Ít nhất 6 ký tự" required minlength="6" autocomplete="new-password">
+                    <div style="position:relative; width:100%;">
+                        <input type="password" id="regPassword" class="form-input-pill" placeholder="Ít nhất 6 ký tự" required minlength="6" autocomplete="new-password" style="padding-right:46px;">
+                        <button type="button" onclick="togglePasswordVisibility('regPassword', this)" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div style="margin-bottom: 12px;">
                     <label style="display:block; font-size:13px; font-weight:700; color:#292929; margin-bottom:5px;">Xác nhận mật khẩu <span style="color:#f33a58;">*</span></label>
-                    <input type="password" id="regConfirmPassword" class="form-input-pill" placeholder="Nhập lại mật khẩu" required minlength="6" autocomplete="new-password">
+                    <div style="position:relative; width:100%;">
+                        <input type="password" id="regConfirmPassword" class="form-input-pill" placeholder="Nhập lại mật khẩu" required minlength="6" autocomplete="new-password" style="padding-right:46px;">
+                        <button type="button" onclick="togglePasswordVisibility('regConfirmPassword', this)" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center;" title="Hiện/Ẩn mật khẩu" aria-label="Hiện mật khẩu">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div style="display:flex; align-items:flex-start; gap:8px; margin: 10px 0 14px; font-size:12.5px; color:#4e5867;">
@@ -323,9 +333,7 @@ require_once __DIR__ . '/../../config/google.php';
                     <strong id="displayOtpEmail" style="color: #2563eb;"></strong>
                 </p>
 
-                <div id="otpDebugBox" style="display:none; background:#fef2f2; border:1px dashed #f87171; color:#991b1b; padding:10px 14px; border-radius:12px; font-size:13px; margin-bottom:16px; text-align:left;">
-                    💡 <b>Môi trường thử nghiệm:</b> Mã OTP là: <span id="debugOtpText" style="font-size:16px; font-weight:bold; letter-spacing:2px; color:#111;"></span>
-                </div>
+                
 
                 <form onsubmit="handleVerifyOtpSubmit(event)">
                     <div style="margin-bottom: 14px;">
@@ -598,10 +606,7 @@ require_once __DIR__ . '/../../config/google.php';
                 document.getElementById('otpSection').style.display = 'block';
                 document.getElementById('displayOtpEmail').innerText = email;
 
-                if (res && res.debug_otp) {
-                    document.getElementById('otpDebugBox').style.display = 'block';
-                    document.getElementById('debugOtpText').innerText = res.debug_otp;
-                }
+
             } catch (err) {
                 showToast(err.message || 'Đăng ký thất bại!', false);
                 btn.disabled = false;
@@ -639,12 +644,23 @@ require_once __DIR__ . '/../../config/google.php';
                 showToast('Đang gửi lại mã OTP mới...', true);
                 const res = await Api.register(regDataPayload);
                 showToast('Đã gửi lại mã OTP mới!', true);
-                if (res && res.debug_otp) {
-                    document.getElementById('otpDebugBox').style.display = 'block';
-                    document.getElementById('debugOtpText').innerText = res.debug_otp;
-                }
+
             } catch (err) {
                 showToast(err.message || 'Gửi lại OTP thất bại!', false);
+            }
+        }
+    </script>
+<script>
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            if (btn) {
+                btn.setAttribute('aria-label', isPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+                btn.innerHTML = isPassword
+                    ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+                    : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
             }
         }
     </script>

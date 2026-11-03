@@ -68,9 +68,17 @@ class UserModel {
     public function findByAccount(string $account)
     {
         $stmt = $this->conn->prepare(
-            "SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1"
+            "SELECT * FROM users WHERE username = ? OR email = ? OR (phone IS NOT NULL AND phone != '' AND phone = ?) LIMIT 1"
         );
-        $stmt->bind_param("ss", $account, $account);
+        $stmt->bind_param("sss", $account, $account, $account);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc() ?: null;
+    }
+
+    public function findByPhone(string $phone)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM users WHERE phone = ? LIMIT 1");
+        $stmt->bind_param("s", $phone);
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc() ?: null;
     }
@@ -164,7 +172,7 @@ class UserModel {
         $stmt = $this->conn->prepare(
             "INSERT INTO users(username, full_name, email, password) VALUES (?, ?, ?, ?)"
         );
-        $stmt->bind_param("sssss", $username, $fullName, $email, $hashed);
+        $stmt->bind_param("ssss", $username, $fullName, $email, $hashed);
         $stmt->execute();
         return (int)$this->conn->insert_id;
     }
@@ -190,8 +198,10 @@ class UserModel {
             return $user;
         }
 
-        // Hỗ trợ mật khẩu cũ chưa mã hóa
-        if (hash_equals((string)$user['password'], (string)$password)) {
+        // Hỗ trợ mật khẩu cũ chưa mã hóa (chỉ khi trong CSDL chưa từng mã hóa bcrypt)
+        $dbPass = (string)$user['password'];
+        $isBcrypt = (str_starts_with($dbPass, '$2y$') || str_starts_with($dbPass, '$2a$') || str_starts_with($dbPass, '$2b$'));
+        if (!$isBcrypt && hash_equals($dbPass, (string)$password)) {
             $this->updatePassword((int)$user['id'], $password);
             return $user;
         }

@@ -28,6 +28,19 @@ class ReportController {
         return ['ok' => true, 'data' => $reports];
     }
 
+    public function floodHistory(int $days = 30): array {
+        // Giới hạn an toàn từ 1 đến 365 ngày (mặc định 30 ngày)
+        $days = max(1, min($days, 365));
+        $reports = $this->model->getHistoricalFloodReports($days);
+        return ['ok' => true, 'data' => $reports];
+    }
+
+    public function trafficHistory(int $days = 90): array {
+        // Giới hạn an toàn từ 1 đến 365 ngày (mặc định 90 ngày cho điểm đen kẹt xe)
+        $days = max(1, min($days, 365));
+        $reports = $this->model->getHistoricalTrafficReports($days);
+        return ['ok' => true, 'data' => $reports];
+    }
     public function create(int $userId, array $in, array $files): array {
         $type     = $in['type'] ?? '';
         $severity = $in['severity'] ?? 'vua';

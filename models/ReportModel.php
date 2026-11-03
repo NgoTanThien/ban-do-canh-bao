@@ -46,6 +46,35 @@ class ReportModel {
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
+    public function getHistoricalFloodReports(int $days = 30): array {
+        $sql = "SELECT id, type, severity, latitude, longitude, address_text, description, created_at,
+                       DATEDIFF(NOW(), created_at) AS days_ago
+                FROM reports
+                WHERE type = 'ngap_nuoc'
+                  AND status IN ('dang_dien_ra', 'da_ket_thuc')
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+                ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $days);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+     public function getHistoricalTrafficReports(int $days = 90): array {
+        $sql = "SELECT id, type, severity, latitude, longitude, address_text, description, created_at,
+                       DATEDIFF(NOW(), created_at) AS days_ago
+                FROM reports
+                WHERE type = 'ket_xe'
+                  AND status IN ('dang_dien_ra', 'da_ket_thuc')
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+                ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $days);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+
         // Trả về id mới (int) hoặc false
     public function createReport($userId, $type, $severity, $latitude, $longitude, $addressText, $description, $imageUrl = null) {
         // Ngập nước: 4 tiếng | Kẹt xe: 2 tiếng

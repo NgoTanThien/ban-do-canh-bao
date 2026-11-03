@@ -195,6 +195,10 @@ function openRadarSettings() {
 }
 
 // 6. TÍCH HỢP THỜI TIẾT (OPEN-METEO) & RADAR MÂY MƯA (RAINVIEWER)
+// 6. TÍCH HỢP THỜI TIẾT (OPEN-METEO) & RADAR MÂY MƯA (RAINVIEWER)
+window.isWeatherRaining = false;
+window.isCurrentlyRaining = false;
+
 async function loadWeatherData(lat = 12.2458, lng = 109.1943) {
     const tempEl = document.getElementById('weather-temp');
     const iconEl = document.getElementById('weather-icon');
@@ -212,6 +216,7 @@ async function loadWeatherData(lat = 12.2458, lng = 109.1943) {
             
             let iconClass = 'ph-bold ph-sun';
             let desc = 'Trời quang';
+            let rainingNow = false;
 
             if (code === 0) {
                 iconClass = 'ph-bold ph-sun';
@@ -225,9 +230,20 @@ async function loadWeatherData(lat = 12.2458, lng = 109.1943) {
             } else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
                 iconClass = 'ph-bold ph-cloud-rain';
                 desc = 'Đang có mưa';
+                rainingNow = true;
             } else if ([95, 96, 99].includes(code)) {
                 iconClass = 'ph-bold ph-cloud-lightning';
                 desc = 'Giông bão nguy hiểm';
+                rainingNow = true;
+            }
+
+            window.isWeatherRaining = rainingNow;
+            const prevRainState = window.isCurrentlyRaining;
+            window.isCurrentlyRaining = window.isWeatherRaining || isRadarActive;
+
+            // Nếu trạng thái mưa thay đổi -> vẽ lại bản đồ để bật/tắt Vùng Rốn Ngập Lịch Sử
+            if (prevRainState !== window.isCurrentlyRaining && typeof renderMarkers === 'function') {
+                renderMarkers(window.currentReports || []);
             }
 
             tempEl.innerText = `${temp}°C`;
@@ -254,7 +270,11 @@ async function toggleRadarLayer() {
             map.removeLayer(rainRadarLayer);
         }
         isRadarActive = false;
+        window.isCurrentlyRaining = window.isWeatherRaining || false;
         if (btn) btn.classList.remove('active');
+        if (typeof renderMarkers === 'function') {
+            renderMarkers(window.currentReports || []);
+        }
         showToast('Đã tắt radar mây mưa', true);
         return;
     }
@@ -288,7 +308,11 @@ async function toggleRadarLayer() {
 
         rainRadarLayer.addTo(map);
         isRadarActive = true;
-        showToast('Đã bật radar mây mưa trực tiếp! 🌧️', true);
+        window.isCurrentlyRaining = true;
+        if (typeof renderMarkers === 'function') {
+            renderMarkers(window.currentReports || []);
+        }
+        showToast('Đã bật radar mây mưa & dự báo vùng rốn ngập! 🌧️', true);
     } catch (err) {
         console.error('Lỗi tải radar mây mưa:', err);
         showToast('Không thể tải radar mây mưa, vui lòng thử lại sau!', false);

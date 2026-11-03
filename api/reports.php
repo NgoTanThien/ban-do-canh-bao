@@ -12,6 +12,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $user = require_login();
         respond($ctrl->myReports((int)$user['id']));
     }
+    if (!empty($_GET['flood_history'])) {
+        $days = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+        respond($ctrl->floodHistory($days));
+    }
+
+    if (!empty($_GET['traffic_history'])) {
+        $days = isset($_GET['days']) ? (int)$_GET['days'] : 90;
+        respond($ctrl->trafficHistory($days));
+    }
     respond($ctrl->list($_GET['type'] ?? 'all'));
 }
 
